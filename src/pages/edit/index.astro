@@ -14,17 +14,17 @@ if (!result.valid || result.edited) return Astro.redirect("/edit/error");
 const metadata = await serverSideGetEditFileMetadata(id);
 if (!metadata) return Astro.redirect("/edit/error");
 
-const title = "Editing " + metadata.fileName;
+const title = "Editing " + metadata.filename;
 ---
 
 <BaseLayout title={title}>
 	<div
 		class="dark:text-white text-black dark:bg-black bg-white flex flex-col h-full w-full"
 	>
-		<h1 class="text-center my-2 text-lg">{metadata.fileName}</h1>
+		<h1 class="text-center my-2 text-lg">{metadata.filename}</h1>
 		{metadata.isForce && <p>(Direct Mode)</p>}
 		<CodeEditor
-			fileName={metadata.fileName}
+			fileName={metadata.filename}
 			id={id}
 			isDiff={metadata.isDiff}
 			extension={metadata.extension}

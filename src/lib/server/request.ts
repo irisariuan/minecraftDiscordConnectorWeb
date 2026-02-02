@@ -33,7 +33,7 @@ export async function serverSideGetEditFileMetadata(id: string) {
 }
 
 export interface EditFileMetadata {
-	fileName: string;
+	filename: string;
 	extension: string;
 	isDiff: boolean;
 	isForce: boolean;

@@ -34,7 +34,6 @@ export async function fetchEditingFile(id: string) {
 		},
 		body: JSON.stringify({ action: "fetch" }),
 	});
-	console.log(res)
 	if (!res.ok) return null;
 	return await res.text();
 }

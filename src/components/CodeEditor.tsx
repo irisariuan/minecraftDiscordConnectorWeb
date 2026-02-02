@@ -39,19 +39,23 @@ export default function CodeEditor({
 		(async () => {
 			setEditorMode(EditorMode.FileLoading);
 			const fileContent = await fetchEditingFile(id);
-			if (!fileContent) {
+			if (fileContent === null) {
 				window.location.href = "/edit/error";
 				return;
 			}
 			if (isDiff) {
-				const { raw, edited } = JSON.parse(fileContent);
-				setRawFileContent(raw);
-				setContent(edited);
-				setEditorMode(EditorMode.EditDiff);
-			} else {
-				setContent(fileContent);
-				setEditorMode(EditorMode.Edit);
+				try {
+					const { raw, edited } = JSON.parse(fileContent);
+					setRawFileContent(raw);
+					setContent(edited);
+					setEditorMode(EditorMode.EditDiff);
+				} catch {
+					window.location.href = "/edit/error";
+				}
+				return;
 			}
+			setContent(fileContent);
+			setEditorMode(EditorMode.Edit);
 		})();
 	}, []);
 
@@ -66,7 +70,7 @@ export default function CodeEditor({
 
 	return (
 		<>
-			{displayable(mode) && !isDiffMode(mode) && content && (
+			{displayable(mode) && !isDiffMode(mode) && content !== null && (
 				<Editor
 					language={language}
 					theme={theme}
@@ -75,17 +79,19 @@ export default function CodeEditor({
 					options={{ readOnly: isViewOnly(mode) }}
 				/>
 			)}
-			{isDiffMode(mode) && content && rawFileContent && (
-				<DiffEditor
-					modified={content}
-					original={rawFileContent}
-					language={language}
-					theme={theme}
-					options={{
-						readOnly: isViewOnly(mode),
-					}}
-				/>
-			)}
+			{isDiffMode(mode) &&
+				content !== null &&
+				rawFileContent !== null && (
+					<DiffEditor
+						modified={content}
+						original={rawFileContent}
+						language={language}
+						theme={theme}
+						options={{
+							readOnly: isViewOnly(mode),
+						}}
+					/>
+				)}
 			{mode === EditorMode.FileLoading && <LoadingState />}
 			{mode === EditorMode.FileUploading && <UploadingState />}
 			{mode === EditorMode.FileUploadFailed && (
