@@ -4,7 +4,7 @@ import node from "@astrojs/node";
 
 import tailwindcss from "@tailwindcss/vite";
 
-import solidJs from "@astrojs/solid-js";
+import react from "@astrojs/react";
 
 // https://astro.build/config
 export default defineConfig({
@@ -16,5 +16,5 @@ export default defineConfig({
 		mode: "middleware",
 	}),
 
-	integrations: [solidJs()],
+	integrations: [react()],
 });
