@@ -1,18 +1,34 @@
 ---
-export const prerender = false
-interface Props {
-    id: string
-}
+export const prerender = false;
+import CodeEditor from "../../components/CodeEditor";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { verifyId } from "../../lib/request";
-const { id } = Astro.props;
-const result = await verifyId(id)
-if (!result.valid || result.edited) {
-    return Astro.redirect("/edit/error");
-}
-const title = "Edit Page";
+import {
+	serverSideVerifyId,
+	serverSideGetEditFileMetadata,
+} from "../../lib/server/request";
+const id = Astro.url.searchParams.get("id");
+if (!id) return Astro.redirect("/edit/error");
+const result = await serverSideVerifyId(id);
+if (!result.valid || result.edited) return Astro.redirect("/edit/error");
+
+const metadata = await serverSideGetEditFileMetadata(id);
+if (!metadata) return Astro.redirect("/edit/error");
+
+const title = "Editing " + metadata.fileName;
 ---
 
 <BaseLayout title={title}>
-    <div></div>
+	<div
+		class="dark:text-white text-black dark:bg-black bg-white flex flex-col h-full w-full"
+	>
+		<h1 class="text-center my-2 text-lg">{metadata.fileName}</h1>
+		{metadata.isForce && <p>(Direct Mode)</p>}
+		<CodeEditor
+			fileName={metadata.fileName}
+			id={id}
+			isDiff={metadata.isDiff}
+			extension={metadata.extension}
+			client:load
+		/>
+	</div>
 </BaseLayout>

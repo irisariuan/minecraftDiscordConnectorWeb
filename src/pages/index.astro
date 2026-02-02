@@ -1,11 +1,18 @@
 ---
+export const prerender = false;
 import BaseLayout from "../layouts/BaseLayout.astro";
 import UploadPlugin from "../components/UploadPlugin";
+import { serverSideVerifyId } from "../lib/server/request";
+
+const id = Astro.url.searchParams.get("id");
+if (!id) return Astro.redirect("/error");
+
+const result = await serverSideVerifyId(id);
+if (!result.valid || result.uploaded) return Astro.redirect("/error");
 ---
 
 <BaseLayout title="Upload Plugins">
 	<div class="w-full h-full flex flex-col">
-		
-	<UploadPlugin client:load />
+		<UploadPlugin id={id} client:load />
 	</div>
 </BaseLayout>
