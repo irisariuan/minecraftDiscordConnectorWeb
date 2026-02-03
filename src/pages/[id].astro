@@ -4,7 +4,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import UploadPlugin from "../components/UploadPlugin";
 import { serverSideVerifyId } from "../lib/server/request";
 
-const id = Astro.url.searchParams.get("id");
+const { id } = Astro.params;
 if (!id) return Astro.redirect("/error");
 
 const result = await serverSideVerifyId(id);

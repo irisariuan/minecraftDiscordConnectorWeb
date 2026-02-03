@@ -6,7 +6,7 @@ import {
 	serverSideVerifyId,
 	serverSideGetEditFileMetadata,
 } from "../../lib/server/request";
-const id = Astro.url.searchParams.get("id");
+const { id } = Astro.params;
 if (!id) return Astro.redirect("/edit/error");
 const result = await serverSideVerifyId(id);
 if (!result.valid || result.edited) return Astro.redirect("/edit/error");
@@ -21,14 +21,29 @@ const title = "Editing " + metadata.filename;
 	<div
 		class="dark:text-white text-black dark:bg-black bg-white flex flex-col h-full w-full"
 	>
-		<h1 class="text-center my-2 text-lg">{metadata.filename}</h1>
-		{metadata.isForce && <p>(Direct Mode)</p>}
-		<CodeEditor
-			fileName={metadata.filename}
-			id={id}
-			isDiff={metadata.isDiff}
-			extension={metadata.extension}
-			client:load
-		/>
+		<div
+			class="border-b dark:border-gray-700 border-gray-300 px-4 pt-4 pb-1"
+		>
+			<h1 class="text-xl font-bold">{metadata.filename}</h1>
+			<div class="flex gap-1 items-center mt-1">
+				{
+					metadata.isForce && (
+						<span class="text-neutral-700 dark:text-neutral-400">
+							Direct Mode
+						</span>
+					)
+				}
+				{
+					metadata.isDiff && (
+						<span class="text-green-700 dark:text-green-400">
+							Diff Mode
+						</span>
+					)
+				}
+			</div>
+		</div>
+		<div class="flex-1 flex flex-col overflow-hidden">
+			<CodeEditor metadata={metadata} id={id} client:load />
+		</div>
 	</div>
 </BaseLayout>

@@ -1,4 +1,4 @@
-import { getSecret } from "astro:env/server";
+import { API_BASE_URL } from "astro:env/client";
 
 export async function serverSideVerifyId(id: string) {
 	if (!id)
@@ -7,7 +7,7 @@ export async function serverSideVerifyId(id: string) {
 			uploaded: false,
 			edited: false,
 		};
-	const res = await fetch(getSecret("API_BASE_URL") + "/api/verify/" + id, {
+	const res = await fetch(API_BASE_URL + "/api/verify/" + id, {
 		mode: "cors",
 	});
 	if (res.ok) {
@@ -19,7 +19,7 @@ export async function serverSideVerifyId(id: string) {
 }
 
 export async function serverSideGetEditFileMetadata(id: string) {
-	const res = await fetch(getSecret("API_BASE_URL") + "/api/edit/" + id, {
+	const res = await fetch(API_BASE_URL + "/api/edit/" + id, {
 		method: "POST",
 		mode: "cors",
 		headers: {
@@ -37,4 +37,20 @@ export interface EditFileMetadata {
 	extension: string;
 	isDiff: boolean;
 	isForce: boolean;
+}
+
+export async function serverSideGetViewFileMetadata(id: string) {
+	const res = await fetch(API_BASE_URL + "/api/view/" + id, {
+		method: "GET",
+		mode: "cors",
+	});
+	if (!res.ok) return null;
+	const data: ViewFileMetadata = await res.json();
+	return data;
+}
+
+export interface ViewFileMetadata {
+	filename: string;
+	content: string;
+	readonly: boolean;
 }

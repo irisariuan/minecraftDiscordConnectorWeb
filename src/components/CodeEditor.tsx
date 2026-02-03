@@ -14,19 +14,18 @@ import {
 	isDiffMode,
 	isViewOnly,
 } from "../lib/editor";
-import { fetchEditingFile, submitEdit } from "../lib/request";
+import { disposeFile, fetchEditingFile, submitEdit } from "../lib/request";
+import type { EditFileMetadata } from "../lib/server/request";
+import { IoEyeSharp } from "react-icons/io5";
 
 export default function CodeEditor({
-	fileName,
 	id,
-	isDiff,
-	extension,
+	metadata,
 }: {
-	fileName: string;
 	id: string;
-	isDiff: boolean;
-	extension: string;
+	metadata: EditFileMetadata;
 }) {
+	const { extension, isDiff } = metadata;
 	const monaco = useMonaco();
 	const [mode, setEditorMode] = useState(EditorMode.FileLoading);
 	const [theme, setTheme] = useState<any>(null);
@@ -67,6 +66,30 @@ export default function CodeEditor({
 			?.getModel();
 		return model?.getValue() || null;
 	}
+	async function uploadFileHandler() {
+		let result = content;
+		if (!editable(mode) || !result) return;
+		if (isDiffMode(mode)) {
+			const diffResult = retrieveDiffResult();
+			if (diffResult !== null) {
+				setContent(diffResult);
+				result = diffResult;
+			} else {
+				return setEditorMode(EditorMode.FileUploadFailed);
+			}
+		}
+		setEditorMode(EditorMode.FileUploading);
+		setEditorMode(
+			(await submitEdit(id, result))
+				? EditorMode.View
+				: EditorMode.FileUploadFailed,
+		);
+	}
+	async function disposeDiff() {
+		setEditorMode(EditorMode.ViewDiff);
+		if (await disposeFile(id)) return;
+		setEditorMode(EditorMode.EditDiff);
+	}
 
 	return (
 		<>
@@ -99,38 +122,37 @@ export default function CodeEditor({
 					onRetry={() => setEditorMode(EditorMode.Edit)}
 				/>
 			)}
-			<div className="p-2 flex gap-2">
+			<div className="p-2 flex gap-2 border-t dark:border-gray-700 border-gray-300 w-full items-center">
 				<button
 					className=" bg-blue-500 py-2 px-4 rounded-2xl text-white cursor-pointer disabled:cursor-auto hover:bg-blue-600 active:bg-blue-800 disabled:bg-neutral-500 disabled:text-neutral-400 transition-colors"
 					disabled={
 						mode === EditorMode.FileLoading || !editable(mode)
 					}
-					onClick={async () => {
-						let result = content;
-						if (!editable(mode) || !result) return;
-						if (isDiffMode(mode)) {
-							const diffResult = retrieveDiffResult();
-							if (diffResult !== null) {
-								setContent(diffResult);
-								result = diffResult;
-							} else {
-								return setEditorMode(
-									EditorMode.FileUploadFailed,
-								);
-							}
-						}
-						setEditorMode(EditorMode.FileUploading);
-						setEditorMode(
-							(await submitEdit(id, result))
-								? EditorMode.View
-								: EditorMode.FileUploadFailed,
-						);
-					}}
+					onClick={uploadFileHandler}
 				>
 					{isViewOnly(mode) ? "Submitted" : "Submit"}
 				</button>
+				{isDiffMode(mode) && editable(mode) && (
+					<button
+						onClick={disposeDiff}
+						className=" bg-red-500 py-2 px-4 rounded-2xl text-white cursor-pointer disabled:cursor-auto hover:bg-red-600 active:bg-red-800 disabled:bg-neutral-500 disabled:text-neutral-400 transition-colors"
+					>
+						Deny
+					</button>
+				)}
 				<ThemeSelect theme={theme} setTheme={setTheme} />
 				<LanguageSelect language={language} setLanguage={setLanguage} />
+				<div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mr-auto w-full flex-1 justify-end">
+					{isViewOnly(mode) && (
+						<>
+							<IoEyeSharp className="h-4 w-4" />
+							<span className="font-semibold">Read-only</span>
+						</>
+					)}
+					<span className="text-xs">
+						This link will expire automatically
+					</span>
+				</div>
 			</div>
 		</>
 	);
