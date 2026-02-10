@@ -2,7 +2,7 @@ import { useState } from "react";
 import NavBar from "./TreeView/NavBar";
 import TreeViewBody, {
 	TreeTagContainerType,
-	TreeTagType,
+	type TreeTagType,
 	type TreeTag,
 } from "./TreeView/TreeViewBody";
 import LoadingState from "./states/LoadingState";
