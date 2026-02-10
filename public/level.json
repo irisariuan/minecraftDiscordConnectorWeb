@@ -1,0 +1,926 @@
+{
+  "name": "",
+  "type": "compound",
+  "value": [
+    {
+      "name": "Data",
+      "type": "compound",
+      "value": [
+        {
+          "name": "thunderTime",
+          "type": "int",
+          "value": 4934
+        },
+        {
+          "name": "Difficulty",
+          "type": "byte",
+          "value": 1
+        },
+        {
+          "name": "allowCommands",
+          "type": "byte",
+          "value": 0
+        },
+        {
+          "name": "LastPlayed",
+          "type": "long",
+          "value": 1770146852955
+        },
+        {
+          "name": "initialized",
+          "type": "byte",
+          "value": 1
+        },
+        {
+          "name": "version",
+          "type": "int",
+          "value": 19133
+        },
+        {
+          "name": "hardcore",
+          "type": "byte",
+          "value": 0
+        },
+        {
+          "name": "game_rules",
+          "type": "compound",
+          "value": [
+            {
+              "name": "minecraft:advance_weather",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:max_entity_cramming",
+              "type": "int",
+              "value": 1000
+            },
+            {
+              "name": "minecraft:command_block_output",
+              "type": "byte",
+              "value": 0
+            },
+            {
+              "name": "minecraft:fall_damage",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:spawn_wardens",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:respawn_radius",
+              "type": "int",
+              "value": 10
+            },
+            {
+              "name": "minecraft:max_command_sequence_length",
+              "type": "int",
+              "value": 200000
+            },
+            {
+              "name": "minecraft:drowning_damage",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:immediate_respawn",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:natural_health_regeneration",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:player_movement_check",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:tnt_explosion_drop_decay",
+              "type": "byte",
+              "value": 0
+            },
+            {
+              "name": "minecraft:advance_time",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:players_nether_portal_creative_delay",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "minecraft:fire_damage",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:keep_inventory",
+              "type": "byte",
+              "value": 0
+            },
+            {
+              "name": "minecraft:command_blocks_work",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:spectators_generate_chunks",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:log_admin_commands",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:block_drops",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:limited_crafting",
+              "type": "byte",
+              "value": 0
+            },
+            {
+              "name": "minecraft:elytra_movement_check",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:global_sound_events",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:lava_source_conversion",
+              "type": "byte",
+              "value": 0
+            },
+            {
+              "name": "minecraft:spread_vines",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:players_nether_portal_default_delay",
+              "type": "int",
+              "value": 80
+            },
+            {
+              "name": "minecraft:players_sleeping_percentage",
+              "type": "int",
+              "value": 20
+            },
+            {
+              "name": "minecraft:entity_drops",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:spawn_phantoms",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:spawn_mobs",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:freeze_damage",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:forgive_dead_players",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:mob_drops",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:max_command_forks",
+              "type": "int",
+              "value": 65536
+            },
+            {
+              "name": "minecraft:water_source_conversion",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:show_advancement_messages",
+              "type": "byte",
+              "value": 0
+            },
+            {
+              "name": "minecraft:allow_entering_nether_using_portals",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:show_death_messages",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:spawn_patrols",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:block_explosion_drop_decay",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:mob_griefing",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:max_block_modifications",
+              "type": "int",
+              "value": 32768
+            },
+            {
+              "name": "minecraft:send_command_feedback",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:pvp",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:spawn_monsters",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:locator_bar",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:fire_spread_radius_around_player",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "minecraft:random_tick_speed",
+              "type": "int",
+              "value": 3
+            },
+            {
+              "name": "minecraft:ender_pearls_vanish_on_death",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:spawner_blocks_work",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:spawn_wandering_traders",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:mob_explosion_drop_decay",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:tnt_explodes",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:max_snow_accumulation_height",
+              "type": "int",
+              "value": 1
+            },
+            {
+              "name": "minecraft:projectiles_can_break_blocks",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "minecraft:reduced_debug_info",
+              "type": "byte",
+              "value": 0
+            },
+            {
+              "name": "minecraft:universal_anger",
+              "type": "byte",
+              "value": 0
+            },
+            {
+              "name": "minecraft:raids",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "",
+              "type": "end"
+            }
+          ]
+        },
+        {
+          "elementType": "string",
+          "name": "ServerBrands",
+          "type": "list",
+          "value": [
+            {
+              "name": "",
+              "type": "string",
+              "value": "Paper"
+            }
+          ]
+        },
+        {
+          "name": "GameType",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "LevelName",
+          "type": "string",
+          "value": "world"
+        },
+        {
+          "name": "Time",
+          "type": "long",
+          "value": 14791996
+        },
+        {
+          "elementType": "end",
+          "name": "ScheduledEvents",
+          "type": "list",
+          "value": []
+        },
+        {
+          "name": "clearWeatherTime",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "WanderingTraderId",
+          "type": "intArray",
+          "value": [
+            -1237300389,
+            -206680382,
+            -1166300194,
+            -1701647996
+          ]
+        },
+        {
+          "name": "WanderingTraderSpawnDelay",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "Bukkit.Version",
+          "type": "string",
+          "value": "Paper/1.21.11-100-4873e3f (MC: 1.21.11)/1.21.11-R0.1-SNAPSHOT"
+        },
+        {
+          "name": "thundering",
+          "type": "byte",
+          "value": 0
+        },
+        {
+          "name": "WasModded",
+          "type": "byte",
+          "value": 1
+        },
+        {
+          "name": "spawn",
+          "type": "compound",
+          "value": [
+            {
+              "name": "pos",
+              "type": "intArray",
+              "value": [
+                0,
+                79,
+                0
+              ]
+            },
+            {
+              "name": "pitch",
+              "type": "float",
+              "value": 0
+            },
+            {
+              "name": "yaw",
+              "type": "float",
+              "value": 0
+            },
+            {
+              "name": "dimension",
+              "type": "string",
+              "value": "minecraft:overworld"
+            },
+            {
+              "name": "",
+              "type": "end"
+            }
+          ]
+        },
+        {
+          "name": "WanderingTraderSpawnChance",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "raining",
+          "type": "byte",
+          "value": 0
+        },
+        {
+          "name": "WorldGenSettings",
+          "type": "compound",
+          "value": [
+            {
+              "name": "bonus_chest",
+              "type": "byte",
+              "value": 0
+            },
+            {
+              "name": "generate_features",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "dimensions",
+              "type": "compound",
+              "value": [
+                {
+                  "name": "minecraft:the_nether",
+                  "type": "compound",
+                  "value": [
+                    {
+                      "name": "type",
+                      "type": "string",
+                      "value": "minecraft:the_nether"
+                    },
+                    {
+                      "name": "generator",
+                      "type": "compound",
+                      "value": [
+                        {
+                          "name": "type",
+                          "type": "string",
+                          "value": "minecraft:noise"
+                        },
+                        {
+                          "name": "biome_source",
+                          "type": "compound",
+                          "value": [
+                            {
+                              "name": "type",
+                              "type": "string",
+                              "value": "minecraft:multi_noise"
+                            },
+                            {
+                              "name": "preset",
+                              "type": "string",
+                              "value": "minecraft:nether"
+                            },
+                            {
+                              "name": "",
+                              "type": "end"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "settings",
+                          "type": "string",
+                          "value": "minecraft:nether"
+                        },
+                        {
+                          "name": "",
+                          "type": "end"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "",
+                      "type": "end"
+                    }
+                  ]
+                },
+                {
+                  "name": "minecraft:overworld",
+                  "type": "compound",
+                  "value": [
+                    {
+                      "name": "type",
+                      "type": "string",
+                      "value": "minecraft:overworld"
+                    },
+                    {
+                      "name": "generator",
+                      "type": "compound",
+                      "value": [
+                        {
+                          "name": "type",
+                          "type": "string",
+                          "value": "minecraft:noise"
+                        },
+                        {
+                          "name": "biome_source",
+                          "type": "compound",
+                          "value": [
+                            {
+                              "name": "type",
+                              "type": "string",
+                              "value": "minecraft:multi_noise"
+                            },
+                            {
+                              "name": "preset",
+                              "type": "string",
+                              "value": "minecraft:overworld"
+                            },
+                            {
+                              "name": "",
+                              "type": "end"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "settings",
+                          "type": "string",
+                          "value": "minecraft:overworld"
+                        },
+                        {
+                          "name": "",
+                          "type": "end"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "",
+                      "type": "end"
+                    }
+                  ]
+                },
+                {
+                  "name": "minecraft:the_end",
+                  "type": "compound",
+                  "value": [
+                    {
+                      "name": "type",
+                      "type": "string",
+                      "value": "minecraft:the_end"
+                    },
+                    {
+                      "name": "generator",
+                      "type": "compound",
+                      "value": [
+                        {
+                          "name": "type",
+                          "type": "string",
+                          "value": "minecraft:noise"
+                        },
+                        {
+                          "name": "biome_source",
+                          "type": "compound",
+                          "value": [
+                            {
+                              "name": "type",
+                              "type": "string",
+                              "value": "minecraft:the_end"
+                            },
+                            {
+                              "name": "",
+                              "type": "end"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "settings",
+                          "type": "string",
+                          "value": "minecraft:end"
+                        },
+                        {
+                          "name": "",
+                          "type": "end"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "",
+                      "type": "end"
+                    }
+                  ]
+                },
+                {
+                  "name": "",
+                  "type": "end"
+                }
+              ]
+            },
+            {
+              "name": "seed",
+              "type": "long",
+              "value": -6316601863114374219
+            },
+            {
+              "name": "",
+              "type": "end"
+            }
+          ]
+        },
+        {
+          "name": "rainTime",
+          "type": "int",
+          "value": 5307
+        },
+        {
+          "name": "paperSpawnDimension",
+          "type": "string",
+          "value": "minecraft:overworld"
+        },
+        {
+          "name": "DataVersion",
+          "type": "int",
+          "value": 4671
+        },
+        {
+          "name": "DataPacks",
+          "type": "compound",
+          "value": [
+            {
+              "elementType": "string",
+              "name": "Enabled",
+              "type": "list",
+              "value": [
+                {
+                  "name": "",
+                  "type": "string",
+                  "value": "vanilla"
+                },
+                {
+                  "name": "",
+                  "type": "string",
+                  "value": "file/bukkit"
+                },
+                {
+                  "name": "",
+                  "type": "string",
+                  "value": "paper"
+                }
+              ]
+            },
+            {
+              "elementType": "string",
+              "name": "Disabled",
+              "type": "list",
+              "value": [
+                {
+                  "name": "",
+                  "type": "string",
+                  "value": "minecart_improvements"
+                },
+                {
+                  "name": "",
+                  "type": "string",
+                  "value": "redstone_experiments"
+                },
+                {
+                  "name": "",
+                  "type": "string",
+                  "value": "trade_rebalance"
+                }
+              ]
+            },
+            {
+              "name": "",
+              "type": "end"
+            }
+          ]
+        },
+        {
+          "name": "DragonFight",
+          "type": "compound",
+          "value": [
+            {
+              "name": "PreviouslyKilled",
+              "type": "byte",
+              "value": 0
+            },
+            {
+              "name": "NeedsStateScanning",
+              "type": "byte",
+              "value": 1
+            },
+            {
+              "name": "DragonKilled",
+              "type": "byte",
+              "value": 0
+            },
+            {
+              "name": "",
+              "type": "end"
+            }
+          ]
+        },
+        {
+          "name": "DifficultyLocked",
+          "type": "byte",
+          "value": 0
+        },
+        {
+          "name": "DayTime",
+          "type": "long",
+          "value": 16996691
+        },
+        {
+          "name": "Version",
+          "type": "compound",
+          "value": [
+            {
+              "name": "Name",
+              "type": "string",
+              "value": "1.21.11"
+            },
+            {
+              "name": "Series",
+              "type": "string",
+              "value": "main"
+            },
+            {
+              "name": "Snapshot",
+              "type": "byte",
+              "value": 0
+            },
+            {
+              "name": "Id",
+              "type": "int",
+              "value": 4671
+            },
+            {
+              "name": "",
+              "type": "end"
+            }
+          ]
+        },
+        {
+          "name": "CustomBossEvents",
+          "type": "compound",
+          "value": [
+            {
+              "name": "ww:game_status",
+              "type": "compound",
+              "value": [
+                {
+                  "name": "Name",
+                  "type": "string",
+                  "value": ""
+                },
+                {
+                  "name": "Visible",
+                  "type": "byte",
+                  "value": 1
+                },
+                {
+                  "name": "",
+                  "type": "end"
+                }
+              ]
+            },
+            {
+              "name": "ww:assignment",
+              "type": "compound",
+              "value": [
+                {
+                  "name": "Name",
+                  "type": "compound",
+                  "value": [
+                    {
+                      "name": "bold",
+                      "type": "byte",
+                      "value": 1
+                    },
+                    {
+                      "name": "color",
+                      "type": "string",
+                      "value": "green"
+                    },
+                    {
+                      "name": "text",
+                      "type": "string",
+                      "value": "分配職業中..."
+                    },
+                    {
+                      "name": "",
+                      "type": "end"
+                    }
+                  ]
+                },
+                {
+                  "name": "Visible",
+                  "type": "byte",
+                  "value": 1
+                },
+                {
+                  "name": "",
+                  "type": "end"
+                }
+              ]
+            },
+            {
+              "name": "ww:ai_counter",
+              "type": "compound",
+              "value": [
+                {
+                  "name": "Name",
+                  "type": "compound",
+                  "value": [
+                    {
+                      "name": "bold",
+                      "type": "byte",
+                      "value": 1
+                    },
+                    {
+                      "name": "color",
+                      "type": "string",
+                      "value": "green"
+                    },
+                    {
+                      "name": "text",
+                      "type": "string",
+                      "value": "產生AI中..."
+                    },
+                    {
+                      "name": "",
+                      "type": "end"
+                    }
+                  ]
+                },
+                {
+                  "name": "Visible",
+                  "type": "byte",
+                  "value": 1
+                },
+                {
+                  "name": "",
+                  "type": "end"
+                }
+              ]
+            },
+            {
+              "name": "ftb:game_status",
+              "type": "compound",
+              "value": [
+                {
+                  "name": "Name",
+                  "type": "string",
+                  "value": ""
+                },
+                {
+                  "name": "Visible",
+                  "type": "byte",
+                  "value": 1
+                },
+                {
+                  "name": "",
+                  "type": "end"
+                }
+              ]
+            },
+            {
+              "name": "",
+              "type": "end"
+            }
+          ]
+        },
+        {
+          "name": "",
+          "type": "end"
+        }
+      ]
+    },
+    {
+      "name": "",
+      "type": "end"
+    }
+  ]
+}
