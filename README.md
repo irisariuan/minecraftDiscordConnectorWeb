@@ -112,7 +112,7 @@ This web UI is served by the Discord bot's Express server and provides three mai
 
 ## Environment Configuration
 
-The web UI requires the `API_BASE_URL` environment variable to communicate with the Discord bot's API:
+The web UI requires the `PUBLIC_API_BASE_URL` environment variable to communicate with the Discord bot's API:
 
 ```bash
 # .env file
