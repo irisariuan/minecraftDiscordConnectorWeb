@@ -19,11 +19,14 @@ export default function TreeViewTagBody({
 	onSuccess?: (input: string) => string;
 }) {
 	return (
-		<div className="flex items-start gap-1 my-1" title={tag.type}>
+		<div
+			className={`flex gap-1 my-1 ${noTitle ? "items-center" : "items-start"}`}
+			title={tag.type}
+		>
 			<div className="flex items-center justify-center p-1 bg-neutral-800 rounded text-neutral-500 h-full">
 				{getIcon(tag.type)}
 			</div>
-			<div className="flex flex-col">
+			<div className="flex flex-col justify-center">
 				{tag.type !== TreeTagValueType.CompoundEnd && !noTitle && (
 					<EditableDisplay
 						onSuccess={onSuccess}

@@ -1,9 +1,4 @@
-import {
-	useState,
-	type Dispatch,
-	type ReactNode,
-	type SetStateAction,
-} from "react";
+import { useState, type ReactNode } from "react";
 import {
 	IoCalculator,
 	IoCaretDown,
@@ -75,29 +70,33 @@ export default function TreeViewTagFoldableBody({
 	tag,
 	zIndex,
 	updateTag,
+	noTitle,
 }: {
 	tag: TreeTag<TreeTagType>;
 	children?: ReactNode;
 	zIndex: number;
-	updateTag: Dispatch<SetStateAction<TreeTag<TreeTagType>>>;
+	updateTag: (tag: TreeTag<TreeTagType>) => void;
+	noTitle?: boolean;
 }) {
 	const [showChildren, setShowChildren] = useState(true);
 	return (
 		<div title={tag.type} className="my-1">
-			<div className="hover:cursor-pointer flex items-center gap-1">
+			<div className="flex items-center gap-1">
 				<div className="flex items-center justify-center p-1 bg-neutral-800 rounded text-neutral-500">
 					{getIcon(tag.type)}
 				</div>
-
-				<EditableDisplay
-					validate={() => true}
-					onSuccess={(s) => {
-						updateTag({ ...tag, name: s });
-						return s;
-					}}
-					defaultValue={tag.name}
-				></EditableDisplay>
+				{!noTitle && (
+					<EditableDisplay
+						validate={() => true}
+						onSuccess={(s) => {
+							updateTag({ ...tag, name: s });
+							return s;
+						}}
+						defaultValue={tag.name}
+					/>
+				)}
 				<button
+					className="hover:cursor-pointer"
 					onClick={() => {
 						setShowChildren((prev) => !prev);
 					}}
@@ -112,7 +111,7 @@ export default function TreeViewTagFoldableBody({
 						className={`min-h-full rounded w-8 my-1 ${bgColorRef[zIndex] ?? ""}`}
 					/>
 					<div
-						className={`ml-2 border-l border-b rounded-bl-xl px-2 max-w-full ${borderColorRef[zIndex] ?? ""}`}
+						className={`ml-2 border-l border-b rounded-bl-xl px-2 py-1 max-w-full overflow-x-scroll ${borderColorRef[zIndex] ?? ""}`}
 					>
 						{children}
 					</div>

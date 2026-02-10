@@ -32,7 +32,7 @@ export enum TreeTagContainerType {
 export default function TreeViewBody({ data }: { data: TreeTag<TreeTagType> }) {
 	const [tag, setTag] = useState(data);
 	return (
-		<div className="flex-1 bg-white dark:bg-black text-black dark:text-white p-2 w-full">
+		<div className="flex-1 bg-white dark:bg-black text-black dark:text-white p-2 max-w-full overflow-scroll">
 			<TreeViewTag
 				zIndex={0}
 				tag={tag}

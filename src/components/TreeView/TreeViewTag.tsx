@@ -8,7 +8,6 @@ import {
 import TreeViewTagFoldableBody from "./TreeViewTagFoldableBody";
 import TreeViewTagBody from "./TreeViewTagBody";
 import EditableDisplay from "./EditableDisplay";
-import type { Dispatch, SetStateAction } from "react";
 function expandable(
 	tag: TreeTag<TreeTagType>,
 ): tag is TreeTag<TreeTagContainerType> {
@@ -42,10 +41,12 @@ export default function TreeViewTag({
 	tag,
 	updateTag,
 	zIndex,
+	noTitle,
 }: {
 	tag: TreeTag<TreeTagType>;
-	updateTag: Dispatch<SetStateAction<TreeTag<TreeTagType>>>;
+	updateTag: (tag: TreeTag<TreeTagType>) => void;
 	zIndex: number;
+	noTitle?: boolean;
 }) {
 	if (expandable(tag)) {
 		return (
@@ -54,7 +55,6 @@ export default function TreeViewTag({
 				zIndex={zIndex}
 				updateTag={(newTag) => {
 					updateTag(newTag);
-					return newTag;
 				}}
 			>
 				{tag.value.map((v, i) => {
@@ -69,8 +69,13 @@ export default function TreeViewTag({
 									name: tag.name,
 								}}
 								onSuccess={(inp) => {
-									tag.value[i] = inp;
-									updateTag(tag);
+									const newValue = [...tag.value];
+									newValue[i] = inp;
+									const updatedTag = {
+										...tag,
+										value: newValue,
+									};
+									updateTag(updatedTag);
 									return inp;
 								}}
 								noTitle
@@ -82,7 +87,13 @@ export default function TreeViewTag({
 										inp.match(/^[\d]+$/) !== null
 									}
 									onSuccess={(s) => {
-										tag.value[i] = s;
+										const newValue = [...tag.value];
+										newValue[i] = s;
+										const updatedTag = {
+											...tag,
+											value: newValue,
+										};
+										updateTag(updatedTag);
 										return s;
 									}}
 								/>
@@ -99,8 +110,13 @@ export default function TreeViewTag({
 									name: tag.name,
 								}}
 								onSuccess={(inp) => {
-									tag.value[i] = Number(inp);
-									updateTag(tag);
+									const newValue = [...tag.value];
+									newValue[i] = Number(inp);
+									const updatedTag = {
+										...tag,
+										value: newValue,
+									};
+									updateTag(updatedTag);
 									return inp;
 								}}
 								noTitle
@@ -115,8 +131,13 @@ export default function TreeViewTag({
 										);
 									}}
 									onSuccess={(s) => {
-										tag.value[i] = Number(s);
-										updateTag(tag);
+										const newValue = [...tag.value];
+										newValue[i] = Number(s);
+										const updatedTag = {
+											...tag,
+											value: newValue,
+										};
+										updateTag(updatedTag);
 										return s;
 									}}
 								/>
@@ -128,10 +149,12 @@ export default function TreeViewTag({
 							key={v.name + v.value + i.toString()}
 							zIndex={zIndex + 1}
 							updateTag={(newTag) => {
-								tag.value[i] = newTag.name;
-								updateTag(tag);
-								return newTag;
+								const newValue = [...tag.value];
+								newValue[i] = newTag;
+								const updatedTag = { ...tag, value: newValue };
+								updateTag(updatedTag);
 							}}
+							noTitle={tag.type === TreeTagContainerType.List}
 						/>
 					);
 				})}
@@ -147,10 +170,11 @@ export default function TreeViewTag({
 				<TreeViewTagBody
 					tag={tag}
 					onSuccess={(input) => {
-						tag.name = input;
-						updateTag(tag);
+						const updatedTag = { ...tag, name: input };
+						updateTag(updatedTag);
 						return input;
 					}}
+					noTitle={noTitle}
 				>
 					<div className="m-1">
 						<EditableDisplay
@@ -165,8 +189,11 @@ export default function TreeViewTag({
 								);
 							}}
 							onSuccess={(s) => {
-								tag.value = parseInt(s, 16);
-								updateTag(tag);
+								const updatedTag = {
+									...tag,
+									value: parseInt(s, 16),
+								};
+								updateTag(updatedTag);
 								return s.toUpperCase();
 							}}
 						/>
@@ -178,10 +205,11 @@ export default function TreeViewTag({
 				<TreeViewTagBody
 					tag={tag}
 					onSuccess={(inp) => {
-						tag.name = inp;
-						updateTag(tag);
+						const updatedTag = { ...tag, name: inp };
+						updateTag(updatedTag);
 						return inp;
 					}}
+					noTitle={noTitle}
 				>
 					<div className="m-1">
 						<EditableDisplay
@@ -189,8 +217,8 @@ export default function TreeViewTag({
 							defaultValue={tag.value?.toString()}
 							validate={() => true}
 							onSuccess={(s) => {
-								tag.value = s;
-								updateTag(tag);
+								const updatedTag = { ...tag, value: s };
+								updateTag(updatedTag);
 								return s;
 							}}
 						/>
@@ -206,10 +234,11 @@ export default function TreeViewTag({
 				<TreeViewTagBody
 					tag={tag}
 					onSuccess={(inp) => {
-						tag.name = inp;
-						updateTag(tag);
+						const updatedTag = { ...tag, name: inp };
+						updateTag(updatedTag);
 						return inp;
 					}}
+					noTitle={noTitle}
 				>
 					<div className="m-1">
 						<EditableDisplay
@@ -224,8 +253,8 @@ export default function TreeViewTag({
 									: data.match(/^[+-]?\d+$/) !== null
 							}
 							onSuccess={(s) => {
-								tag.value = Number(s);
-								updateTag(tag);
+								const updatedTag = { ...tag, value: Number(s) };
+								updateTag(updatedTag);
 								return s;
 							}}
 						/>

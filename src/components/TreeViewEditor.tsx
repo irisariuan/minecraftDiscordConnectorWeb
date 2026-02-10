@@ -16,7 +16,7 @@ export default function TreeViewEditor() {
 	return (
 		<div className="flex flex-col h-full w-full">
 			{mode !== TreeEditorMode.FileLoading && (
-				<TreeViewBody data={testData} />
+				<TreeViewBody data={testData as any}  />
 			)}
 			{mode === TreeEditorMode.FileLoading && <LoadingState />}
 			<NavBar mode={mode} />
