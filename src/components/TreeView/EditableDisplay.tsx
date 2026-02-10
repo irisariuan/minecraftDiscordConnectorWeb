@@ -27,12 +27,12 @@ export default function EditableDisplay({
 			className={
 				overrideClassName
 					? className
-					: `outline-0 placeholder:text-red-400 placeholder:italic ${className ?? ''}`
+					: `outline-0 placeholder:text-red-500 dark:placeholder:text-red-400 placeholder:italic ${className ?? ""}`
 			}
 			placeholder={placeholderText}
 			disabled={disabled}
 			onBlur={(inp) => {
-				if (inp.currentTarget.value === text) return
+				if (inp.currentTarget.value === text) return;
 				if (!validate(inp.currentTarget.value)) {
 					inp.preventDefault();
 					if (!text) return;

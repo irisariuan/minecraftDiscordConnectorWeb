@@ -29,17 +29,14 @@ export enum TreeTagContainerType {
 	Compound = "compound",
 }
 
-export default function TreeViewBody({ data }: { data: TreeTag<TreeTagType> }) {
-	const [tag, setTag] = useState(data);
+export default function TreeViewBody({ data, setData }: { data: TreeTag<TreeTagType>, setData: Dispatch<SetStateAction<TreeTag<TreeTagType>>> }) {
 	return (
 		<div className="flex-1 bg-white dark:bg-black text-black dark:text-white p-2 max-w-full overflow-scroll">
 			<TreeViewTag
 				zIndex={0}
-				tag={tag}
-				updateTag={(newTag) => {
-					setTag(newTag);
-					console.log(newTag);
-				}}
+				tag={data}
+				updateTag={setData}
+				noTitle
 			/>
 		</div>
 	);

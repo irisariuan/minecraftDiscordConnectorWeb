@@ -56,6 +56,7 @@ export default function TreeViewTag({
 				updateTag={(newTag) => {
 					updateTag(newTag);
 				}}
+				noTitle={noTitle}
 			>
 				{tag.value.map((v, i) => {
 					if (typeof v === "string")
@@ -81,7 +82,7 @@ export default function TreeViewTag({
 								noTitle
 							>
 								<EditableDisplay
-									className="text-sm text-neutral-400"
+									className="text-sm text-neutral-600 dark:text-neutral-400"
 									defaultValue={v}
 									validate={(inp) =>
 										inp.match(/^[\d]+$/) !== null
@@ -122,7 +123,7 @@ export default function TreeViewTag({
 								noTitle
 							>
 								<EditableDisplay
-									className="text-sm text-neutral-400"
+									className="text-sm text-neutral-600 dark:text-neutral-400"
 									defaultValue={v.toString()}
 									validate={(inp) => {
 										const num = Number(inp);
@@ -178,7 +179,7 @@ export default function TreeViewTag({
 				>
 					<div className="m-1">
 						<EditableDisplay
-							className="text-sm text-neutral-400"
+							className="text-sm text-neutral-600 dark:text-neutral-400"
 							defaultValue={(tag.value as number)
 								.toString(16)
 								.toUpperCase()}
@@ -213,7 +214,7 @@ export default function TreeViewTag({
 				>
 					<div className="m-1">
 						<EditableDisplay
-							className="text-sm text-neutral-400"
+							className="text-sm text-neutral-600 dark:text-neutral-400"
 							defaultValue={tag.value?.toString()}
 							validate={() => true}
 							onSuccess={(s) => {
@@ -242,7 +243,7 @@ export default function TreeViewTag({
 				>
 					<div className="m-1">
 						<EditableDisplay
-							className="text-sm text-neutral-400"
+							className="text-sm text-neutral-600 dark:text-neutral-400"
 							defaultValue={tag.value?.toString()}
 							validate={(data) =>
 								tag.type === TreeTagValueType.Float ||

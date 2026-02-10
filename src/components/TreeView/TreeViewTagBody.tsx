@@ -23,7 +23,7 @@ export default function TreeViewTagBody({
 			className={`flex gap-1 my-1 ${noTitle ? "items-center" : "items-start"}`}
 			title={tag.type}
 		>
-			<div className="flex items-center justify-center p-1 bg-neutral-800 rounded text-neutral-500 h-full">
+			<div className="flex items-center justify-center p-1 bg-neutral-200 dark:bg-neutral-800 rounded text-neutral-600 dark:text-neutral-500 h-full">
 				{getIcon(tag.type)}
 			</div>
 			<div className="flex flex-col justify-center">
@@ -32,7 +32,7 @@ export default function TreeViewTagBody({
 						onSuccess={onSuccess}
 						validate={() => true}
 						defaultValue={tag.name}
-						className="text-neutral-100"
+						className="text-neutral-800 dark:text-neutral-100"
 					/>
 				)}
 				{children}

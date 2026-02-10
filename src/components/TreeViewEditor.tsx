@@ -1,8 +1,11 @@
 import { useState } from "react";
 import NavBar from "./TreeView/NavBar";
-import TreeViewBody from "./TreeView/TreeViewBody";
+import TreeViewBody, {
+	TreeTagContainerType,
+	TreeTagType,
+	type TreeTag,
+} from "./TreeView/TreeViewBody";
 import LoadingState from "./states/LoadingState";
-import testData from "../../public/level.json";
 
 export enum TreeEditorMode {
 	FileLoading,
@@ -11,12 +14,17 @@ export enum TreeEditorMode {
 	Submitted,
 }
 
-export default function TreeViewEditor() {
+export default function TreeViewEditor({
+	data,
+}: {
+	data: TreeTag<TreeTagContainerType>;
+}) {
 	const [mode, setMode] = useState(TreeEditorMode.Edit);
+	const [tag, setTag] = useState<TreeTag<TreeTagType>>(data);
 	return (
 		<div className="flex flex-col h-full w-full">
 			{mode !== TreeEditorMode.FileLoading && (
-				<TreeViewBody data={testData as any}  />
+				<TreeViewBody data={tag} setData={setTag} />
 			)}
 			{mode === TreeEditorMode.FileLoading && <LoadingState />}
 			<NavBar mode={mode} />

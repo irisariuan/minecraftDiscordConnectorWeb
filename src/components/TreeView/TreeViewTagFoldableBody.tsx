@@ -49,20 +49,20 @@ export function getIcon(tagType: TreeTagType, className?: string): ReactNode {
 }
 
 export const bgColorRef: Record<number, string> = {
-	0: "bg-neutral-800",
-	1: "bg-red-950",
-	2: "bg-blue-950",
-	3: "bg-green-950",
-	4: "bg-yellow-950",
-	5: "bg-purple-950",
+	0: "bg-neutral-200 dark:bg-neutral-800",
+	1: "bg-red-100 dark:bg-red-950",
+	2: "bg-blue-100 dark:bg-blue-950",
+	3: "bg-green-100 dark:bg-green-950",
+	4: "bg-yellow-100 dark:bg-yellow-950",
+	5: "bg-purple-100 dark:bg-purple-950",
 };
 
 export const borderColorRef: Record<number, string> = {
-	1: "border-red-500",
-	2: "border-blue-500",
-	3: "border-green-500",
-	4: "border-yellow-500",
-	5: "border-purple-500",
+	1: "border-red-400 dark:border-red-500",
+	2: "border-blue-400 dark:border-blue-500",
+	3: "border-green-400 dark:border-green-500",
+	4: "border-yellow-400 dark:border-yellow-500",
+	5: "border-purple-400 dark:border-purple-500",
 };
 
 export default function TreeViewTagFoldableBody({
@@ -82,7 +82,7 @@ export default function TreeViewTagFoldableBody({
 	return (
 		<div title={tag.type} className="my-1">
 			<div className="flex items-center gap-1">
-				<div className="flex items-center justify-center p-1 bg-neutral-800 rounded text-neutral-500">
+				<div className="flex items-center justify-center p-1 bg-neutral-200 dark:bg-neutral-800 rounded text-neutral-600 dark:text-neutral-500">
 					{getIcon(tag.type)}
 				</div>
 				{!noTitle && (
