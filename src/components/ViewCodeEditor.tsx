@@ -29,7 +29,7 @@ export default function ViewCodeEditor({
 		(async () => {
 			setLoading(true);
 			try {
-				const result = await fetchViewFile(id);
+				const result = await fetchViewFile(id, false, false);
 				if (!result.success) {
 					setError(result.error ?? "Error loading file");
 					return;

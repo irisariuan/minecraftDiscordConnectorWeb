@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "astro:env/client";
+import type { TreeTag, TreeTagContainerType } from "./treeView/types";
 
 export async function uploadFiles(id: string, file: File) {
 	const formData = new FormData();
@@ -27,16 +28,35 @@ export async function fetchFile(id: string) {
 	}
 }
 
-export async function fetchEditingFile(id: string) {
+export async function fetchEditingFile(
+	id: string,
+	isNbt: true,
+	isBedrock: boolean,
+): Promise<TreeTag<TreeTagContainerType> | null>;
+export async function fetchEditingFile(
+	id: string,
+	isNbt: false,
+	isBedrock: boolean,
+): Promise<string | null>;
+export async function fetchEditingFile(
+	id: string,
+	isNbt: boolean,
+	isBedrock: boolean,
+): Promise<TreeTag<TreeTagContainerType> | string | null> {
 	const res = await fetch(API_BASE_URL + "/api/edit/" + id, {
 		method: "POST",
 		mode: "cors",
 		headers: {
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify({ action: "fetch" }),
+		body: JSON.stringify({ action: "fetch", parseNbt: isNbt, isBedrock }),
 	});
 	if (!res.ok) return null;
+	if (isNbt) {
+		const data = await res.json();
+		if (!data.parsed) return null;
+		return data.parsed as TreeTag<TreeTagContainerType>;
+	}
 	return await res.text();
 }
 
@@ -55,12 +75,19 @@ export async function submitEdit(
 	return res.ok;
 }
 
-export async function fetchViewFile(id: string): Promise<{
+export async function fetchViewFile(
+	id: string,
+	isNbt: boolean,
+	isBedrock: boolean,
+): Promise<{
 	success: boolean;
 	content?: string;
 	error?: string;
 }> {
-	const res = await fetch(API_BASE_URL + "/api/view/" + id, {
+	const url = new URL(API_BASE_URL + "/api/view/" + id);
+	url.searchParams.append("isNbt", isNbt ? "true" : "false");
+	url.searchParams.append("isBedrock", isBedrock ? "true" : "false");
+	const res = await fetch(url, {
 		mode: "cors",
 	});
 	if (!res.ok) {

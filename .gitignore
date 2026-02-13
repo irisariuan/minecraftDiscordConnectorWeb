@@ -24,4 +24,6 @@ pnpm-debug.log*
 .idea/
 
 bun.lock
-src/lib/compiled
+test/*
+!.gitkeep
+!test/**/*.test.*

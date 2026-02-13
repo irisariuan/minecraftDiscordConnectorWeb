@@ -1,6 +1,13 @@
+import type { Dispatch, SetStateAction } from "react";
 import { TreeEditorMode } from "../TreeViewEditor";
 
-export default function NavBar({ mode }: { mode: TreeEditorMode }) {
+export default function NavBar({
+	mode,
+	setMode,
+}: {
+	mode: TreeEditorMode;
+	setMode: Dispatch<SetStateAction<TreeEditorMode>>;
+}) {
 	return (
 		<div className="p-2 flex gap-2 border-t dark:border-gray-700 border-gray-300 w-full items-center sticky bottom-0 bg-gray-100/60 dark:bg-gray-900/60 backdrop-blur-3xl">
 			<button

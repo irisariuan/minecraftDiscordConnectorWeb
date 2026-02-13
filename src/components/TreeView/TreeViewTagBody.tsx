@@ -3,17 +3,21 @@ import {
 	TreeTagValueType,
 	type TreeTag,
 	type TreeTagType,
-} from "./TreeViewBody";
-import { getIcon } from "./TreeViewTagFoldableBody";
+} from "../../lib/treeView/types";
+import { getIcon } from "../../lib/treeView/component";
 import EditableDisplay from "./EditableDisplay";
 
 export default function TreeViewTagBody({
 	children,
 	tag,
 	noTitle,
+	isDiff,
+	viewOnly,
 	onSuccess = (input) => input,
 }: {
 	tag: TreeTag<TreeTagType>;
+	isDiff: boolean;
+	viewOnly: boolean;
 	children?: ReactNode;
 	noTitle?: boolean;
 	onSuccess?: (input: string) => string;
@@ -33,6 +37,7 @@ export default function TreeViewTagBody({
 						validate={() => true}
 						defaultValue={tag.name}
 						className="text-neutral-800 dark:text-neutral-100"
+						disabled={viewOnly}
 					/>
 				)}
 				{children}

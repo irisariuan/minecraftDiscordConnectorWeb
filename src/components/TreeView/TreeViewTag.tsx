@@ -4,49 +4,32 @@ import {
 	type TreeTagType,
 	type TreeTag,
 	TreeTagValueType,
-} from "./TreeViewBody";
+} from "../../lib/treeView/types";
+import {
+	expandable,
+	isValue,
+	getRelativeTagType,
+	withinRange,
+	type NumericTypes,
+} from "../../lib/treeView/utils";
 import TreeViewTagFoldableBody from "./TreeViewTagFoldableBody";
 import TreeViewTagBody from "./TreeViewTagBody";
 import EditableDisplay from "./EditableDisplay";
-function expandable(
-	tag: TreeTag<TreeTagType>,
-): tag is TreeTag<TreeTagContainerType> {
-	return (Object.values(TreeTagContainerType) as TreeTagType[]).includes(
-		tag.type,
-	);
-}
-function getRelativeTagType(tagType: TreeTagContainerType): TreeTagType | null {
-	switch (tagType) {
-		case TreeTagContainerType.ByteArray:
-			return TreeTagValueType.Byte;
-		case TreeTagContainerType.List:
-			return null;
-		case TreeTagContainerType.Compound:
-			return null;
-		case TreeTagContainerType.IntArray:
-			return TreeTagValueType.Int;
-		case TreeTagContainerType.LongIntArray:
-			return TreeTagValueType.LongInt;
-		default:
-			return null;
-	}
-}
-function isValue(tag: TreeTag<TreeTagType>): tag is TreeTag<TreeTagValueType> {
-	return (Object.values(TreeTagValueType) as TreeTagType[]).includes(
-		tag.type,
-	);
-}
 
 export default function TreeViewTag({
 	tag,
 	updateTag,
 	zIndex,
 	noTitle,
+	viewOnly,
+	isDiff,
 }: {
 	tag: TreeTag<TreeTagType>;
 	updateTag: (tag: TreeTag<TreeTagType>) => void;
 	zIndex: number;
 	noTitle?: boolean;
+	viewOnly: boolean;
+	isDiff: boolean;
 }) {
 	if (expandable(tag)) {
 		return (
@@ -57,11 +40,14 @@ export default function TreeViewTag({
 					updateTag(newTag);
 				}}
 				noTitle={noTitle}
+				viewOnly={viewOnly}
+				isDiff={isDiff}
 			>
 				{tag.value.map((v, i) => {
 					if (typeof v === "string")
 						return (
 							<TreeViewTagBody
+								isDiff={isDiff}
 								tag={{
 									type:
 										getRelativeTagType(tag.type) ??
@@ -80,6 +66,7 @@ export default function TreeViewTag({
 									return inp;
 								}}
 								noTitle
+								viewOnly={viewOnly}
 							>
 								<EditableDisplay
 									className="text-sm text-neutral-600 dark:text-neutral-400"
@@ -87,6 +74,7 @@ export default function TreeViewTag({
 									validate={(inp) =>
 										inp.match(/^[\d]+$/) !== null
 									}
+									disabled={viewOnly}
 									onSuccess={(s) => {
 										const newValue = [...tag.value];
 										newValue[i] = s;
@@ -121,6 +109,8 @@ export default function TreeViewTag({
 									return inp;
 								}}
 								noTitle
+								viewOnly={viewOnly}
+								isDiff={isDiff}
 							>
 								<EditableDisplay
 									className="text-sm text-neutral-600 dark:text-neutral-400"
@@ -141,11 +131,13 @@ export default function TreeViewTag({
 										updateTag(updatedTag);
 										return s;
 									}}
+									disabled={viewOnly}
 								/>
 							</TreeViewTagBody>
 						);
 					return (
 						<TreeViewTag
+							isDiff={isDiff}
 							tag={v}
 							key={v.name + v.value + i.toString()}
 							zIndex={zIndex + 1}
@@ -156,6 +148,7 @@ export default function TreeViewTag({
 								updateTag(updatedTag);
 							}}
 							noTitle={tag.type === TreeTagContainerType.List}
+							viewOnly={viewOnly}
 						/>
 					);
 				})}
@@ -170,12 +163,14 @@ export default function TreeViewTag({
 			return (
 				<TreeViewTagBody
 					tag={tag}
+					isDiff={isDiff}
 					onSuccess={(input) => {
 						const updatedTag = { ...tag, name: input };
 						updateTag(updatedTag);
 						return input;
 					}}
 					noTitle={noTitle}
+					viewOnly={viewOnly}
 				>
 					<div className="m-1">
 						<EditableDisplay
@@ -197,6 +192,7 @@ export default function TreeViewTag({
 								updateTag(updatedTag);
 								return s.toUpperCase();
 							}}
+							disabled={viewOnly}
 						/>
 					</div>
 				</TreeViewTagBody>
@@ -204,6 +200,7 @@ export default function TreeViewTag({
 		case TreeTagValueType.String:
 			return (
 				<TreeViewTagBody
+					isDiff={isDiff}
 					tag={tag}
 					onSuccess={(inp) => {
 						const updatedTag = { ...tag, name: inp };
@@ -211,6 +208,7 @@ export default function TreeViewTag({
 						return inp;
 					}}
 					noTitle={noTitle}
+					viewOnly={viewOnly}
 				>
 					<div className="m-1">
 						<EditableDisplay
@@ -222,6 +220,7 @@ export default function TreeViewTag({
 								updateTag(updatedTag);
 								return s;
 							}}
+							disabled={viewOnly}
 						/>
 					</div>
 				</TreeViewTagBody>
@@ -233,6 +232,7 @@ export default function TreeViewTag({
 		case TreeTagValueType.DoubleFloat:
 			return (
 				<TreeViewTagBody
+					isDiff={isDiff}
 					tag={tag}
 					onSuccess={(inp) => {
 						const updatedTag = { ...tag, name: inp };
@@ -240,6 +240,7 @@ export default function TreeViewTag({
 						return inp;
 					}}
 					noTitle={noTitle}
+					viewOnly={viewOnly}
 				>
 					<div className="m-1">
 						<EditableDisplay
@@ -251,19 +252,26 @@ export default function TreeViewTag({
 									? data.match(
 											/^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/,
 										) !== null
-									: data.match(/^[+-]?\d+$/) !== null
+									: data.match(/^[+-]?\d+$/) !== null ||
+										withinRange(
+											Number(data),
+											tag.type as NumericTypes,
+										)
 							}
 							onSuccess={(s) => {
 								const updatedTag = { ...tag, value: Number(s) };
 								updateTag(updatedTag);
 								return s;
 							}}
+							disabled={viewOnly}
 						/>
 					</div>
 				</TreeViewTagBody>
 			);
 		case TreeTagValueType.CompoundEnd:
-			return <TreeViewTagBody tag={tag} />;
+			return (
+				<TreeViewTagBody viewOnly={false} isDiff={false} tag={tag} />
+			);
 		default:
 			return <TbQuestionMark />;
 	}
