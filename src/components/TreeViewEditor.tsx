@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { MdVerticalSplit, MdViewAgenda } from "react-icons/md";
 import { fetchEditingNbtFile, submitEdit } from "../lib/request";
 import { parse, stringify } from "../lib/jsonBigInt";
 import { type TreeTag, type TreeTagType } from "../lib/treeView/types";
@@ -35,6 +36,7 @@ export default function TreeViewEditor({
 	);
 	const [diffMaps, setDiffMaps] = useState<DiffMaps | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const [hiding, setHiding] = useState<null | "original" | "edited">(null);
 
 	// Drag state
 	const [isDragging, setIsDragging] = useState(false);
@@ -193,40 +195,101 @@ export default function TreeViewEditor({
 							</div>
 						)}
 						{isDiff && originalTag !== null && (
-							<div className="flex flex-1 overflow-hidden">
-								{/* Original (read-only) */}
-								<div className="flex-1 flex flex-col overflow-hidden border-r dark:border-gray-700 border-gray-300">
-									<div className="px-3 py-1 text-xs font-semibold text-neutral-500 dark:text-neutral-400 border-b dark:border-gray-700 border-gray-300 bg-neutral-50 dark:bg-neutral-900">
-										Original
-									</div>
-									<div className="flex-1 overflow-auto">
-										<TreeViewBody
-											data={originalTag}
-											setData={() => {}}
-											viewOnly
-											diffAnnotations={
-												diffMaps?.originalMap
+							<div className="flex flex-col flex-1 min-h-0">
+								{/* Pane toggle bar */}
+								<div className="sticky top-0 z-10 flex items-center border-b dark:border-gray-700 border-gray-300 bg-neutral-50 dark:bg-neutral-900 flex-col">
+									<div className="flex w-full gap-1 px-2 py-1 items-center">
+										<p className="text-xs text-neutral-400 dark:text-neutral-500 mr-1 select-none">
+											View:
+										</p>
+										<button
+											onClick={() => setHiding(null)}
+											title="Show both panes side by side"
+											className={`flex items-center gap-1 px-2 rounded text-sm transition-colors ${
+												hiding === null
+													? "bg-blue-500 text-white"
+													: "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+											}`}
+										>
+											<MdVerticalSplit size={13} />
+											<span>Split</span>
+										</button>
+										<button
+											onClick={() => setHiding("edited")}
+											title="Show only the Original pane"
+											className={`flex items-center gap-1 px-2 rounded text-sm transition-colors ${
+												hiding === "edited"
+													? "bg-blue-500 text-white"
+													: "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+											}`}
+										>
+											<MdViewAgenda
+												size={13}
+												className="rotate-90"
+											/>
+											<span>Original</span>
+										</button>
+										<button
+											onClick={() =>
+												setHiding("original")
 											}
-										/>
+											title="Show only the Edited pane"
+											className={`flex items-center gap-1 px-2 rounded text-sm transition-colors ${
+												hiding === "original"
+													? "bg-blue-500 text-white"
+													: "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+											}`}
+										>
+											<MdViewAgenda
+												size={13}
+												className="rotate-90"
+											/>
+											<span>Edited</span>
+										</button>
+									</div>
+									<div className="flex w-full border-t dark:border-gray-700 border-gray-300">
+										{hiding !== "original" && (
+											<p className="p-1 text-xs font-semibold text-neutral-500 dark:text-neutral-400 flex-1 text-center border-r dark:border-gray-700 border-gray-300">
+												Original
+											</p>
+										)}
+										{hiding !== "edited" && (
+											<p className="p-1 text-xs font-semibold text-green-600 dark:text-green-400 flex-1 text-center">
+												Edited
+											</p>
+										)}
 									</div>
 								</div>
-								{/* Edited */}
-								<div className="flex-1 flex flex-col overflow-hidden">
-									<div className="px-3 py-1 text-xs font-semibold text-green-600 dark:text-green-400 border-b dark:border-gray-700 border-gray-300 bg-neutral-50 dark:bg-neutral-900">
-										Edited
-									</div>
-									<div className="flex-1">
-										<TreeViewBody
-											data={tag}
-											setData={setTag}
-											viewOnly={
-												mode !== TreeEditorMode.Edit
-											}
-											diffAnnotations={
-												diffMaps?.editedMap
-											}
-										/>
-									</div>
+
+								<div className="flex flex-1 min-h-0 overflow-hidden w-full">
+									{/* Original (read-only) */}
+									{hiding !== "original" && (
+										<div className={"flex-1 overflow-scroll" + (hiding === null ? " border-r dark:border-gray-700 border-gray-300" : "")}>
+											<TreeViewBody
+												data={originalTag}
+												setData={() => {}}
+												viewOnly
+												diffAnnotations={
+													diffMaps?.originalMap
+												}
+											/>
+										</div>
+									)}
+									{/* Edited */}
+									{hiding !== "edited" && (
+										<div className="flex-1 overflow-scroll">
+											<TreeViewBody
+												data={tag}
+												setData={setTag}
+												viewOnly={
+													mode !== TreeEditorMode.Edit
+												}
+												diffAnnotations={
+													diffMaps?.editedMap
+												}
+											/>
+										</div>
+									)}
 								</div>
 							</div>
 						)}

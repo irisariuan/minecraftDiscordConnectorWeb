@@ -135,10 +135,10 @@ export default function AddChildForm({
 					<button
 						key={type}
 						title={TYPE_LABELS[type]}
-						className={`flex items-center gap-1 py-1 px-2 rounded text-sm transition-colors hover:cursor-pointer ${
+						className={`flex items-center gap-1 py-1 px-2 rounded text-sm transition-colors ${
 							selectedType === type
 								? "bg-blue-500 dark:bg-blue-600 text-white"
-								: "bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300"
+								: "bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:cursor-pointer"
 						}`}
 						onClick={() => setSelectedType(type)}
 					>
