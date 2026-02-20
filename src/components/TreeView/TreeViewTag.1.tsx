@@ -1,23 +1,20 @@
 import { TbQuestionMark } from "react-icons/tb";
 import {
-	TreeTagContainerType,
-	type TreeTagType,
 	type TreeTag,
+	type TreeTagType,
 	TreeTagValueType,
+	TreeTagContainerType,
 } from "../../lib/treeView/types";
 import {
 	expandable,
-	isValue,
 	getRelativeTagType,
+	isValue,
 	withinRange,
 	type NumericTypes,
 } from "../../lib/treeView/utils";
-import type { DiffStatus } from "../../lib/treeView/diff";
-import TreeViewTagFoldableBody from "./TreeViewTagFoldableBody";
-import TreeViewTagBody from "./TreeViewTagBody";
 import EditableDisplay from "./EditableDisplay";
-import StringTag from "./StringTag";
-import NumberTag from "./NumberTag";
+import TreeViewTagBody from "./TreeViewTagBody";
+import TreeViewTagFoldableBody from "./TreeViewTagFoldableBody";
 
 export default function TreeViewTag({
 	tag,
@@ -25,17 +22,15 @@ export default function TreeViewTag({
 	zIndex,
 	noTitle,
 	viewOnly,
-	diffAnnotations,
+	isDiff,
 }: {
 	tag: TreeTag<TreeTagType>;
 	updateTag: (tag: TreeTag<TreeTagType>) => void;
 	zIndex: number;
 	noTitle?: boolean;
 	viewOnly: boolean;
-	diffAnnotations?: Map<TreeTag<TreeTagType>, DiffStatus>;
+	isDiff: boolean;
 }) {
-	const diffStatus = diffAnnotations?.get(tag);
-
 	if (expandable(tag)) {
 		return (
 			<TreeViewTagFoldableBody
@@ -46,37 +41,100 @@ export default function TreeViewTag({
 				}}
 				noTitle={noTitle}
 				viewOnly={viewOnly}
-				diffStatus={diffStatus}
 			>
 				{tag.value.map((v, i) => {
-					if (typeof v === "string") {
+					if (typeof v === "string")
 						return (
-							<StringTag
-								tag={tag}
-								updateTag={updateTag}
+							<TreeViewTagBody
+								tag={{
+									type:
+										getRelativeTagType(tag.type) ??
+										TreeTagValueType.String,
+									value: v,
+									name: tag.name,
+								}}
+								onSuccess={(inp) => {
+									const newValue = [...tag.value];
+									newValue[i] = inp;
+									const updatedTag = {
+										...tag,
+										value: newValue,
+									};
+									updateTag(updatedTag);
+									return inp;
+								}}
+								noTitle
 								viewOnly={viewOnly}
-								value={v}
-								itemIndex={i}
-								diffAnnotations={diffAnnotations}
-								key={v + i.toString()}
-							/>
+							>
+								<EditableDisplay
+									className="text-sm text-neutral-600 dark:text-neutral-400"
+									defaultValue={v}
+									validate={(inp) =>
+										inp.match(/^[\d]+$/) !== null
+									}
+									disabled={viewOnly}
+									onSuccess={(s) => {
+										const newValue = [...tag.value];
+										newValue[i] = s;
+										const updatedTag = {
+											...tag,
+											value: newValue,
+										};
+										updateTag(updatedTag);
+										return s;
+									}}
+								/>
+							</TreeViewTagBody>
 						);
-					}
-					if (typeof v === "number") {
+					if (typeof v === "number")
 						return (
-							<NumberTag
-								tag={tag}
-								updateTag={updateTag}
+							<TreeViewTagBody
+								tag={{
+									type:
+										getRelativeTagType(tag.type) ??
+										TreeTagValueType.Int,
+									value: v,
+									name: tag.name,
+								}}
+								onSuccess={(inp) => {
+									const newValue = [...tag.value];
+									newValue[i] = Number(inp);
+									const updatedTag = {
+										...tag,
+										value: newValue,
+									};
+									updateTag(updatedTag);
+									return inp;
+								}}
+								noTitle
 								viewOnly={viewOnly}
-								value={v}
-								itemIndex={i}
-								key={v.toString() + i.toString()}
-								diffAnnotations={diffAnnotations}
-							/>
+							>
+								<EditableDisplay
+									className="text-sm text-neutral-600 dark:text-neutral-400"
+									defaultValue={v.toString()}
+									validate={(inp) => {
+										const num = Number(inp);
+										return (
+											!isNaN(num) && Number.isInteger(num)
+										);
+									}}
+									onSuccess={(s) => {
+										const newValue = [...tag.value];
+										newValue[i] = Number(s);
+										const updatedTag = {
+											...tag,
+											value: newValue,
+										};
+										updateTag(updatedTag);
+										return s;
+									}}
+									disabled={viewOnly}
+								/>
+							</TreeViewTagBody>
 						);
-					}
 					return (
 						<TreeViewTag
+							isDiff={isDiff}
 							tag={v}
 							key={v.name + i.toString()}
 							zIndex={zIndex + 1}
@@ -88,7 +146,6 @@ export default function TreeViewTag({
 							}}
 							noTitle={tag.type === TreeTagContainerType.List}
 							viewOnly={viewOnly}
-							diffAnnotations={diffAnnotations}
 						/>
 					);
 				})}
@@ -103,7 +160,6 @@ export default function TreeViewTag({
 			return (
 				<TreeViewTagBody
 					tag={tag}
-					diffStatus={diffStatus}
 					onSuccess={(input) => {
 						const updatedTag = { ...tag, name: input };
 						updateTag(updatedTag);
@@ -141,7 +197,6 @@ export default function TreeViewTag({
 			return (
 				<TreeViewTagBody
 					tag={tag}
-					diffStatus={diffStatus}
 					onSuccess={(inp) => {
 						const updatedTag = { ...tag, name: inp };
 						updateTag(updatedTag);
@@ -173,7 +228,6 @@ export default function TreeViewTag({
 			return (
 				<TreeViewTagBody
 					tag={tag}
-					diffStatus={diffStatus}
 					onSuccess={(inp) => {
 						const updatedTag = { ...tag, name: inp };
 						updateTag(updatedTag);

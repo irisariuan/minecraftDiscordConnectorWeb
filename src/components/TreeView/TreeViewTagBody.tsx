@@ -4,6 +4,7 @@ import {
 	type TreeTag,
 	type TreeTagType,
 } from "../../lib/treeView/types";
+import { diffBgClass, type DiffStatus } from "../../lib/treeView/diff";
 import { getIcon } from "../../lib/treeView/component";
 import EditableDisplay from "./EditableDisplay";
 
@@ -11,20 +12,22 @@ export default function TreeViewTagBody({
 	children,
 	tag,
 	noTitle,
-	isDiff,
 	viewOnly,
+	diffStatus,
 	onSuccess = (input) => input,
 }: {
 	tag: TreeTag<TreeTagType>;
-	isDiff: boolean;
 	viewOnly: boolean;
 	children?: ReactNode;
 	noTitle?: boolean;
+	diffStatus?: DiffStatus;
 	onSuccess?: (input: string) => string;
 }) {
+	const bgClass = diffStatus ? diffBgClass[diffStatus] : "rounded";
+
 	return (
 		<div
-			className={`flex gap-1 my-1 ${noTitle ? "items-center" : "items-start"}`}
+			className={`flex gap-1 my-1 ${noTitle ? "items-center" : "items-start"} ${bgClass}`}
 			title={tag.type}
 		>
 			<div className="flex items-center justify-center p-1 bg-neutral-200 dark:bg-neutral-800 rounded text-neutral-600 dark:text-neutral-500 h-full">

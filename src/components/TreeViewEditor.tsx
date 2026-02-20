@@ -6,6 +6,7 @@ import ErrorState from "./states/ErrorState";
 import LoadingState from "./states/LoadingState";
 import NavBar from "./TreeView/NavBar";
 import TreeViewBody from "./TreeView/TreeViewBody";
+import { computeDiffMaps, type DiffMaps } from "../lib/treeView/diff";
 
 export enum TreeEditorMode {
 	FileLoading,
@@ -32,6 +33,7 @@ export default function TreeViewEditor({
 	const [originalTag, setOriginalTag] = useState<TreeTag<TreeTagType> | null>(
 		null,
 	);
+	const [diffMaps, setDiffMaps] = useState<DiffMaps | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
 	// Drag state
@@ -56,6 +58,15 @@ export default function TreeViewEditor({
 			setMode(TreeEditorMode.Edit);
 		})();
 	}, [id, isBedrock]);
+
+	// Recompute diff annotations whenever tag or originalTag changes
+	useEffect(() => {
+		if (isDiff && tag && originalTag) {
+			setDiffMaps(computeDiffMaps(originalTag, tag));
+		} else {
+			setDiffMaps(null);
+		}
+	}, [tag, originalTag, isDiff]);
 
 	async function handleSubmit() {
 		if (!tag || mode !== TreeEditorMode.Edit) return;
@@ -192,8 +203,10 @@ export default function TreeViewEditor({
 										<TreeViewBody
 											data={originalTag}
 											setData={() => {}}
-											isDiff={false}
 											viewOnly
+											diffAnnotations={
+												diffMaps?.originalMap
+											}
 										/>
 									</div>
 								</div>
@@ -206,9 +219,11 @@ export default function TreeViewEditor({
 										<TreeViewBody
 											data={tag}
 											setData={setTag}
-											isDiff
 											viewOnly={
 												mode !== TreeEditorMode.Edit
+											}
+											diffAnnotations={
+												diffMaps?.editedMap
 											}
 										/>
 									</div>
@@ -221,7 +236,6 @@ export default function TreeViewEditor({
 								<TreeViewBody
 									data={tag}
 									setData={setTag}
-									isDiff={false}
 									viewOnly={mode !== TreeEditorMode.Edit}
 								/>
 							</div>

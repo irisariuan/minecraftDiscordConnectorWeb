@@ -77,9 +77,8 @@ export default function ViewTreeEditor({
 		<div className="flex flex-col h-full w-full overflow-hidden">
 			<div className="flex-1 overflow-auto">
 				<TreeViewBody
-					data={tag!}
+					data={tag}
 					setData={() => {}}
-					isDiff={false}
 					viewOnly
 				/>
 			</div>

@@ -25,3 +25,6 @@ export enum TreeTagContainerType {
 	List = "list",
 	Compound = "compound",
 }
+export const TreeTagTypeEnums = (
+	Object.values(TreeTagValueType) as string[]
+).concat(Object.values(TreeTagContainerType));
