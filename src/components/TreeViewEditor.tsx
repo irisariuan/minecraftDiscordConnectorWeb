@@ -37,11 +37,7 @@ export default function TreeViewEditor({
 	const [diffMaps, setDiffMaps] = useState<DiffMaps | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [hiding, setHiding] = useState<null | "original" | "edited">(null);
-
-	// Drag state
-	const [isDragging, setIsDragging] = useState(false);
-	const dragCounterRef = useRef(0);
-
+	
 	// Hidden file-input ref for the import feature
 	const uploadInputRef = useRef<HTMLInputElement>(null);
 
@@ -122,44 +118,6 @@ export default function TreeViewEditor({
 		reader.readAsText(file);
 	}
 
-	function handleDragEnter(e: React.DragEvent) {
-		e.preventDefault();
-		dragCounterRef.current++;
-		setIsDragging(true);
-	}
-
-	function handleDragLeave(e: React.DragEvent) {
-		e.preventDefault();
-		dragCounterRef.current--;
-		if (dragCounterRef.current <= 0) {
-			dragCounterRef.current = 0;
-			setIsDragging(false);
-		}
-	}
-
-	function handleDrop(e: React.DragEvent) {
-		e.preventDefault();
-		dragCounterRef.current = 0;
-		setIsDragging(false);
-		const file = e.dataTransfer.files[0];
-		if (file) loadFile(file);
-	}
-
-	function loadFile(file: File) {
-		const reader = new FileReader();
-		reader.onload = (e) => {
-			const text = (e.target?.result as string) ?? "";
-			try {
-				const parsed = parse(text) as TreeTag<TreeTagType>;
-				setTag(parsed);
-				setMode(TreeEditorMode.Edit);
-			} catch {
-				console.error("Failed to parse dropped file as JSON");
-			}
-		};
-		reader.readAsText(file);
-	}
-
 	// Pure error (no content at all)
 	if (error && mode === TreeEditorMode.SubmitFailed && !tag) {
 		return <ErrorState errorMessage={error} />;
@@ -180,20 +138,7 @@ export default function TreeViewEditor({
 
 			{mode !== TreeEditorMode.FileLoading && tag !== null && (
 				<>
-					<div
-						className="flex-1 flex flex-col"
-						onDragEnter={handleDragEnter}
-						onDragLeave={handleDragLeave}
-						onDragOver={(e) => e.preventDefault()}
-						onDrop={handleDrop}
-					>
-						{isDragging && (
-							<div className="absolute inset-0 z-50 bg-blue-500/10 border-4 border-dashed border-blue-400 rounded-2xl flex items-center justify-center pointer-events-none">
-								<p className="bg-blue-900/80 px-6 py-4 rounded-2xl text-blue-200 text-xl font-semibold select-none backdrop-blur-xl">
-									Drop to import file
-								</p>
-							</div>
-						)}
+					<div className="flex-1 flex flex-col">
 						{isDiff && originalTag !== null && (
 							<div className="flex flex-col flex-1 min-h-0">
 								{/* Pane toggle bar */}
@@ -264,7 +209,14 @@ export default function TreeViewEditor({
 								<div className="flex flex-1 min-h-0 overflow-hidden w-full">
 									{/* Original (read-only) */}
 									{hiding !== "original" && (
-										<div className={"flex-1 overflow-scroll" + (hiding === null ? " border-r dark:border-gray-700 border-gray-300" : "")}>
+										<div
+											className={
+												"flex-1 overflow-scroll" +
+												(hiding === null
+													? " border-r dark:border-gray-700 border-gray-300"
+													: "")
+											}
+										>
 											<TreeViewBody
 												data={originalTag}
 												setData={() => {}}
