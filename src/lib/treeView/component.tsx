@@ -1,18 +1,18 @@
 import type { ReactNode } from "react";
 import {
-    IoCalculator,
-    IoCodeSlash,
-    IoGrid,
-    IoListCircle,
-    IoServer,
-    IoText,
-    IoToggle
+	IoCalculator,
+	IoCodeSlash,
+	IoGrid,
+	IoListCircle,
+	IoServer,
+	IoText,
+	IoToggle,
 } from "react-icons/io5";
 import { TbDecimal, TbNumber123, TbQuestionMark } from "react-icons/tb";
 import {
-    TreeTagContainerType,
-    TreeTagValueType,
-    type TreeTagType
+	TreeTagContainerType,
+	TreeTagValueType,
+	type TreeTagType,
 } from "./types";
 
 export function getIcon(tagType: TreeTagType, className?: string): ReactNode {
@@ -51,6 +51,15 @@ export const bgColorRef: Record<number, string> = {
 	3: "bg-green-100 dark:bg-green-950",
 	4: "bg-yellow-100 dark:bg-yellow-950",
 	5: "bg-purple-100 dark:bg-purple-950",
+};
+
+export const textColorRef: Record<number, string> = {
+	0: "text-neutral-600 dark:text-neutral-500",
+	1: "text-red-600 dark:text-red-400",
+	2: "text-blue-600 dark:text-blue-400",
+	3: "text-green-600 dark:text-green-400",
+	4: "text-yellow-600 dark:text-yellow-400",
+	5: "text-purple-600 dark:text-purple-400",
 };
 
 export const borderColorRef: Record<number, string> = {
