@@ -170,9 +170,24 @@ export default function EditableDisplay({
 			capture: true,
 		});
 		window.addEventListener("resize", update, { passive: true });
+
+		// On iOS Safari the virtual keyboard triggers viewport changes that
+		// don't fire as regular window scroll/resize events.  The
+		// VisualViewport API exposes dedicated resize & scroll events for
+		// exactly this case.
+		const vv = window.visualViewport;
+		if (vv) {
+			vv.addEventListener("resize", update, { passive: true });
+			vv.addEventListener("scroll", update, { passive: true });
+		}
+
 		return () => {
 			window.removeEventListener("scroll", update, { capture: true });
 			window.removeEventListener("resize", update);
+			if (vv) {
+				vv.removeEventListener("resize", update);
+				vv.removeEventListener("scroll", update);
+			}
 		};
 	}, [isExpanded, capturePosition]);
 
@@ -216,6 +231,15 @@ export default function EditableDisplay({
 					? { minHeight: fixedRect.height }
 					: undefined
 			}
+			// ── hover (on wrapper so it works even when input is disabled) ─
+			onMouseEnter={() => {
+				isHovered.current = true;
+				tryExpand(false);
+			}}
+			onMouseLeave={() => {
+				isHovered.current = false;
+				collapse();
+			}}
 		>
 			<label />
 			<input
@@ -233,19 +257,19 @@ export default function EditableDisplay({
 				style={isExpanded ? expandedInputStyle : undefined}
 				placeholder={placeholderText}
 				disabled={disabled}
-				// ── hover ──────────────────────────────────────────────
-				onMouseEnter={() => {
-					isHovered.current = true;
-					tryExpand(false);
-				}}
-				onMouseLeave={() => {
-					isHovered.current = false;
-					collapse();
-				}}
 				// ── focus / edit ───────────────────────────────────────
 				onFocus={() => {
 					isFocused.current = true;
 					tryExpand(true);
+					// On iOS Safari the virtual keyboard opens after
+					// focus, scrolling the page.  Re-capture position once
+					// the keyboard animation has likely settled so the
+					// fixed overlay tracks the wrapper's new location.
+					requestAnimationFrame(() => {
+						capturePosition();
+						// A second pass catches slower keyboard animations.
+						setTimeout(() => capturePosition(), 300);
+					});
 				}}
 				onInput={handleInput}
 				onBlur={(inp) => {
