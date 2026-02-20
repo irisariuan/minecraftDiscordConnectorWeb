@@ -16,6 +16,7 @@ export default function StringTag({
 	value,
 	itemIndex,
 	diffAnnotations,
+	onDelete,
 }: {
 	tag: TreeTag<TreeTagContainerType>;
 	updateTag: (tag: TreeTag<TreeTagType>) => void;
@@ -23,6 +24,7 @@ export default function StringTag({
 	value: string;
 	itemIndex: number;
 	diffAnnotations?: Map<TreeTag<TreeTagType>, DiffStatus>;
+	onDelete?: () => void;
 }) {
 	const diffStatus = diffAnnotations?.get(tag);
 
@@ -46,6 +48,7 @@ export default function StringTag({
 			noTitle
 			viewOnly={viewOnly}
 			diffStatus={diffStatus}
+			onDelete={onDelete}
 		>
 			<EditableDisplay
 				className="text-sm text-neutral-600 dark:text-neutral-400"

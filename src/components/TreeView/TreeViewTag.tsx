@@ -1,23 +1,23 @@
 import { TbQuestionMark } from "react-icons/tb";
+import type { DiffStatus } from "../../lib/treeView/diff";
 import {
+	type TreeTag,
 	TreeTagContainerType,
 	type TreeTagType,
-	type TreeTag,
 	TreeTagValueType,
 } from "../../lib/treeView/types";
 import {
-	expandable,
-	isValue,
-	getRelativeTagType,
-	withinRange,
 	type NumericTypes,
+	expandable,
+	isContainerType,
+	isValue,
+	withinRange,
 } from "../../lib/treeView/utils";
-import type { DiffStatus } from "../../lib/treeView/diff";
-import TreeViewTagFoldableBody from "./TreeViewTagFoldableBody";
-import TreeViewTagBody from "./TreeViewTagBody";
 import EditableDisplay from "./EditableDisplay";
-import StringTag from "./StringTag";
 import NumberTag from "./NumberTag";
+import StringTag from "./StringTag";
+import TreeViewTagBody from "./TreeViewTagBody";
+import TreeViewTagFoldableBody from "./TreeViewTagFoldableBody";
 
 export default function TreeViewTag({
 	tag,
@@ -26,6 +26,7 @@ export default function TreeViewTag({
 	noTitle,
 	viewOnly,
 	diffAnnotations,
+	onDelete,
 }: {
 	tag: TreeTag<TreeTagType>;
 	updateTag: (tag: TreeTag<TreeTagType>) => void;
@@ -33,71 +34,136 @@ export default function TreeViewTag({
 	noTitle?: boolean;
 	viewOnly: boolean;
 	diffAnnotations?: Map<TreeTag<TreeTagType>, DiffStatus>;
+	onDelete?: () => void;
 }) {
 	const diffStatus = diffAnnotations?.get(tag);
+
+	function removeChildAt(index: number) {
+		const newValue = (
+			tag.value as (string | number | TreeTag<TreeTagType>)[]
+		).filter((_, i) => i !== index);
+		updateTag({ ...tag, value: newValue });
+	}
+
+	function addChild(item: string | number | TreeTag<TreeTagType>) {
+		const newValue = [
+			...(tag.value as (string | number | TreeTag<TreeTagType>)[]),
+			item,
+		];
+		// swap the new item with the last element (CompoundEnd) to keep CompoundEnd at the end of the list
+		if (isContainerType(tag)) {
+			const compoundEndIndex = newValue.findIndex(
+				(v) =>
+					typeof v !== "string" &&
+					typeof v !== "number" &&
+					v.type === TreeTagValueType.CompoundEnd,
+			);
+			if (compoundEndIndex !== -1) {
+				const temp = newValue[compoundEndIndex];
+				newValue[compoundEndIndex] = newValue[newValue.length - 1];
+				newValue[newValue.length - 1] = temp;
+			}
+		}
+		if (
+			typeof item !== "string" &&
+			typeof item !== "number" &&
+			item.type === TreeTagContainerType.Compound
+		) {
+			(item as TreeTag<TreeTagContainerType.Compound>).value.push({
+				type: TreeTagValueType.CompoundEnd,
+				name: "",
+				value: undefined,
+			});
+		}
+		updateTag({ ...tag, value: newValue });
+	}
 
 	if (expandable(tag)) {
 		return (
 			<TreeViewTagFoldableBody
 				tag={tag}
 				zIndex={zIndex}
-				updateTag={(newTag) => {
-					updateTag(newTag);
-				}}
+				updateTag={(newTag) => updateTag(newTag)}
 				noTitle={noTitle}
 				viewOnly={viewOnly}
 				diffStatus={diffStatus}
+				onDelete={onDelete}
+				onAddChild={addChild}
 			>
-				{tag.value.map((v, i) => {
-					if (typeof v === "string") {
+				{(tag.value as (string | number | TreeTag<TreeTagType>)[]).map(
+					(v, i) => {
+						if (typeof v === "string") {
+							return (
+								<StringTag
+									key={v + i.toString()}
+									tag={tag}
+									updateTag={updateTag}
+									viewOnly={viewOnly}
+									value={v}
+									itemIndex={i}
+									diffAnnotations={diffAnnotations}
+									onDelete={
+										!viewOnly
+											? () => removeChildAt(i)
+											: undefined
+									}
+								/>
+							);
+						}
+						if (typeof v === "number") {
+							return (
+								<NumberTag
+									key={v.toString() + i.toString()}
+									tag={tag}
+									updateTag={updateTag}
+									viewOnly={viewOnly}
+									value={v}
+									itemIndex={i}
+									diffAnnotations={diffAnnotations}
+									onDelete={
+										!viewOnly
+											? () => removeChildAt(i)
+											: undefined
+									}
+								/>
+							);
+						}
 						return (
-							<StringTag
-								tag={tag}
-								updateTag={updateTag}
+							<TreeViewTag
+								key={v.name + i.toString()}
+								tag={v}
+								zIndex={zIndex + 1}
+								updateTag={(newTag) => {
+									const newValue = [
+										...(tag.value as (
+											| string
+											| number
+											| TreeTag<TreeTagType>
+										)[]),
+									];
+									newValue[i] = newTag;
+									updateTag({ ...tag, value: newValue });
+								}}
+								noTitle={tag.type === TreeTagContainerType.List}
 								viewOnly={viewOnly}
-								value={v}
-								itemIndex={i}
 								diffAnnotations={diffAnnotations}
-								key={v + i.toString()}
+								onDelete={
+									!viewOnly
+										? () => removeChildAt(i)
+										: undefined
+								}
 							/>
 						);
-					}
-					if (typeof v === "number") {
-						return (
-							<NumberTag
-								tag={tag}
-								updateTag={updateTag}
-								viewOnly={viewOnly}
-								value={v}
-								itemIndex={i}
-								key={v.toString() + i.toString()}
-								diffAnnotations={diffAnnotations}
-							/>
-						);
-					}
-					return (
-						<TreeViewTag
-							tag={v}
-							key={v.name + i.toString()}
-							zIndex={zIndex + 1}
-							updateTag={(newTag) => {
-								const newValue = [...tag.value];
-								newValue[i] = newTag;
-								const updatedTag = { ...tag, value: newValue };
-								updateTag(updatedTag);
-							}}
-							noTitle={tag.type === TreeTagContainerType.List}
-							viewOnly={viewOnly}
-							diffAnnotations={diffAnnotations}
-						/>
-					);
-				})}
+					},
+				)}
 			</TreeViewTagFoldableBody>
 		);
 	}
+
 	if (!isValue(tag)) {
 		return <TbQuestionMark />;
 	}
+
 	switch (tag.type) {
 		case TreeTagValueType.Byte:
 			return (
@@ -105,12 +171,12 @@ export default function TreeViewTag({
 					tag={tag}
 					diffStatus={diffStatus}
 					onSuccess={(input) => {
-						const updatedTag = { ...tag, name: input };
-						updateTag(updatedTag);
+						updateTag({ ...tag, name: input });
 						return input;
 					}}
 					noTitle={noTitle}
 					viewOnly={viewOnly}
+					onDelete={onDelete}
 				>
 					<div className="m-1">
 						<EditableDisplay
@@ -118,18 +184,11 @@ export default function TreeViewTag({
 							defaultValue={(tag.value as number)
 								.toString(16)
 								.toUpperCase()}
-							validate={(data) => {
-								return (
-									data.toLowerCase().match(/^[0-9a-f]+$/) !==
-									null
-								);
-							}}
+							validate={(data) =>
+								data.toLowerCase().match(/^[0-9a-f]+$/) !== null
+							}
 							onSuccess={(s) => {
-								const updatedTag = {
-									...tag,
-									value: parseInt(s, 16),
-								};
-								updateTag(updatedTag);
+								updateTag({ ...tag, value: parseInt(s, 16) });
 								return s.toUpperCase();
 							}}
 							disabled={viewOnly}
@@ -137,18 +196,19 @@ export default function TreeViewTag({
 					</div>
 				</TreeViewTagBody>
 			);
+
 		case TreeTagValueType.String:
 			return (
 				<TreeViewTagBody
 					tag={tag}
 					diffStatus={diffStatus}
 					onSuccess={(inp) => {
-						const updatedTag = { ...tag, name: inp };
-						updateTag(updatedTag);
+						updateTag({ ...tag, name: inp });
 						return inp;
 					}}
 					noTitle={noTitle}
 					viewOnly={viewOnly}
+					onDelete={onDelete}
 				>
 					<div className="m-1">
 						<EditableDisplay
@@ -156,8 +216,7 @@ export default function TreeViewTag({
 							defaultValue={tag.value?.toString()}
 							validate={() => true}
 							onSuccess={(s) => {
-								const updatedTag = { ...tag, value: s };
-								updateTag(updatedTag);
+								updateTag({ ...tag, value: s });
 								return s;
 							}}
 							disabled={viewOnly}
@@ -165,6 +224,7 @@ export default function TreeViewTag({
 					</div>
 				</TreeViewTagBody>
 			);
+
 		case TreeTagValueType.Int:
 		case TreeTagValueType.ShortInt:
 		case TreeTagValueType.LongInt:
@@ -175,12 +235,12 @@ export default function TreeViewTag({
 					tag={tag}
 					diffStatus={diffStatus}
 					onSuccess={(inp) => {
-						const updatedTag = { ...tag, name: inp };
-						updateTag(updatedTag);
+						updateTag({ ...tag, name: inp });
 						return inp;
 					}}
 					noTitle={noTitle}
 					viewOnly={viewOnly}
+					onDelete={onDelete}
 				>
 					<div className="m-1">
 						<EditableDisplay
@@ -199,8 +259,7 @@ export default function TreeViewTag({
 										)
 							}
 							onSuccess={(s) => {
-								const updatedTag = { ...tag, value: Number(s) };
-								updateTag(updatedTag);
+								updateTag({ ...tag, value: Number(s) });
 								return s;
 							}}
 							disabled={viewOnly}
@@ -208,8 +267,10 @@ export default function TreeViewTag({
 					</div>
 				</TreeViewTagBody>
 			);
+
 		case TreeTagValueType.CompoundEnd:
 			return <TreeViewTagBody viewOnly={false} tag={tag} />;
+
 		default:
 			return <TbQuestionMark />;
 	}
