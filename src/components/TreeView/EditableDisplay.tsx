@@ -217,6 +217,7 @@ export default function EditableDisplay({
 					: undefined
 			}
 		>
+			<label />
 			<input
 				ref={ref}
 				defaultValue={defaultValue}
