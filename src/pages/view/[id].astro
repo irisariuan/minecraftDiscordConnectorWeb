@@ -2,22 +2,20 @@
 export const prerender = false;
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ViewCodeEditor from "../../components/ViewCodeEditor";
+import ViewTreeEditor from "../../components/ViewTreeEditor";
 import { serverSideGetViewFileMetadata } from "../../lib/server/request";
 
 const { id } = Astro.params;
 if (!id) return Astro.redirect("/error");
 
-// Fetch file metadata from the API
 const metadata = await serverSideGetViewFileMetadata(id);
-
-if (!metadata) {
-	return Astro.redirect("/error");
-}
+if (!metadata) return Astro.redirect("/error");
 
 const fileName = metadata.filename;
 const parts = fileName.split(".");
 const fileExtension =
 	parts.length > 1 ? parts[parts.length - 1] || "txt" : "txt";
+const isNbt = fileExtension === "dat";
 
 const title = "Viewing " + fileName;
 ---
@@ -26,15 +24,30 @@ const title = "Viewing " + fileName;
 	<div
 		class="dark:text-white text-black dark:bg-black bg-white flex flex-col h-full w-full"
 	>
-		<div class="border-b dark:border-gray-700 border-gray-300 p-4">
+		<div
+			class="border-b dark:border-gray-700 border-gray-300 p-4 flex items-center gap-3"
+		>
 			<h1 class="text-xl font-bold">{fileName}</h1>
+			{
+				isNbt && (
+					<span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">
+						NBT
+					</span>
+				)
+			}
 		</div>
 		<div class="flex-1 flex flex-col overflow-hidden">
-			<ViewCodeEditor
-				id={id}
-				extension={fileExtension}
-				client:load
-			/>
+			{
+				isNbt ? (
+					<ViewTreeEditor id={id} filename={fileName} client:load />
+				) : (
+					<ViewCodeEditor
+						id={id}
+						extension={fileExtension}
+						client:load
+					/>
+				)
+			}
 		</div>
 	</div>
 </BaseLayout>

@@ -19,7 +19,7 @@ export async function serverSideVerifyId(id: string) {
 }
 
 export async function serverSideGetEditFileMetadata(id: string) {
-	const res = await fetch(API_BASE_URL + "/api/edit/" + id, {
+	const res = await fetch(API_BASE_URL + "/api/file/" + id, {
 		method: "POST",
 		mode: "cors",
 		headers: {
@@ -37,10 +37,11 @@ export interface EditFileMetadata {
 	extension: string;
 	isDiff: boolean;
 	isForce: boolean;
+	isNBT: boolean;
 }
 
 export async function serverSideGetViewFileMetadata(id: string) {
-	const res = await fetch(API_BASE_URL + "/api/view/" + id, {
+	const res = await fetch(API_BASE_URL + "/api/file/" + id, {
 		method: "GET",
 		mode: "cors",
 	});

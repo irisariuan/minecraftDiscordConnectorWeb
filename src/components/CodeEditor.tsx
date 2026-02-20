@@ -1,5 +1,6 @@
 import { DiffEditor, Editor, useMonaco } from "@monaco-editor/react";
 import { useEffect, useState } from "react";
+import { stringify } from "json-bigint";
 
 import { decideLanguageFromExtension } from "../lib/language";
 import LanguageSelect from "./LanguageSelect";
@@ -17,6 +18,7 @@ import {
 import { disposeFile, fetchEditingFile, submitEdit } from "../lib/request";
 import type { EditFileMetadata } from "../lib/server/request";
 import { IoEyeSharp } from "react-icons/io5";
+import TreeViewEditor from "./TreeViewEditor";
 
 export default function CodeEditor({
 	id,
@@ -25,7 +27,7 @@ export default function CodeEditor({
 	id: string;
 	metadata: EditFileMetadata;
 }) {
-	const { extension, isDiff } = metadata;
+	const { extension, isDiff, isNBT } = metadata;
 	const monaco = useMonaco();
 	const [mode, setEditorMode] = useState(EditorMode.FileLoading);
 	const [theme, setTheme] = useState<any>(null);
@@ -34,7 +36,11 @@ export default function CodeEditor({
 	const [language, setLanguage] = useState<string>(
 		decideLanguageFromExtension(extension),
 	);
+
 	useEffect(() => {
+		// NBT files are handled entirely by TreeViewEditor — skip Monaco loading
+		if (isNBT) return;
+
 		(async () => {
 			setEditorMode(EditorMode.FileLoading);
 			const fileContent = await fetchEditingFile(id, false, false);
@@ -66,6 +72,7 @@ export default function CodeEditor({
 			?.getModel();
 		return model?.getValue() || null;
 	}
+
 	async function uploadFileHandler() {
 		let result = content;
 		if (!editable(mode) || !result) return;
@@ -85,12 +92,19 @@ export default function CodeEditor({
 				: EditorMode.FileUploadFailed,
 		);
 	}
+
 	async function disposeDiff() {
 		setEditorMode(EditorMode.ViewDiff);
 		if (await disposeFile(id)) return;
 		setEditorMode(EditorMode.EditDiff);
 	}
 
+	// ── NBT: delegate entirely to TreeViewEditor ─────────────────────────────
+	if (isNBT) {
+		return <TreeViewEditor id={id} isBedrock={false} isDiff={isDiff} />;
+	}
+
+	// ── Plain-text / Monaco ───────────────────────────────────────────────────
 	return (
 		<>
 			{displayable(mode) && !isDiffMode(mode) && content !== null && (
@@ -124,7 +138,7 @@ export default function CodeEditor({
 			)}
 			<div className="p-2 flex gap-2 border-t dark:border-gray-700 border-gray-300 w-full items-center">
 				<button
-					className=" bg-blue-500 py-2 px-4 rounded-2xl text-white cursor-pointer disabled:cursor-auto hover:bg-blue-600 active:bg-blue-800 disabled:bg-neutral-500 disabled:text-neutral-400 transition-colors"
+					className="bg-blue-500 py-2 px-4 rounded-2xl text-white cursor-pointer disabled:cursor-auto hover:bg-blue-600 active:bg-blue-800 disabled:bg-neutral-500 disabled:text-neutral-400 transition-colors"
 					disabled={
 						mode === EditorMode.FileLoading || !editable(mode)
 					}
@@ -135,7 +149,7 @@ export default function CodeEditor({
 				{isDiffMode(mode) && editable(mode) && (
 					<button
 						onClick={disposeDiff}
-						className=" bg-red-500 py-2 px-4 rounded-2xl text-white cursor-pointer disabled:cursor-auto hover:bg-red-600 active:bg-red-800 disabled:bg-neutral-500 disabled:text-neutral-400 transition-colors"
+						className="bg-red-500 py-2 px-4 rounded-2xl text-white cursor-pointer disabled:cursor-auto hover:bg-red-600 active:bg-red-800 disabled:bg-neutral-500 disabled:text-neutral-400 transition-colors"
 					>
 						Deny
 					</button>
