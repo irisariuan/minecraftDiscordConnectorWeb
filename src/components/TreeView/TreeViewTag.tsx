@@ -139,7 +139,7 @@ export default function TreeViewTag({
 						<TreeViewTag
 							isDiff={isDiff}
 							tag={v}
-							key={v.name + v.value + i.toString()}
+							key={v.name + i.toString()}
 							zIndex={zIndex + 1}
 							updateTag={(newTag) => {
 								const newValue = [...tag.value];

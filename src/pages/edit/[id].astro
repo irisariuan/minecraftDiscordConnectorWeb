@@ -1,6 +1,7 @@
 ---
 export const prerender = false;
 import CodeEditor from "../../components/CodeEditor";
+import TreeViewEditor from "../../components/TreeViewEditor";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import {
 	serverSideVerifyId,
@@ -51,8 +52,20 @@ const title = "Editing " + metadata.filename;
 				}
 			</div>
 		</div>
-		<div class="flex-1 flex flex-col overflow-hidden">
-			<CodeEditor metadata={metadata} id={id} client:load />
+		<div class="flex-1 flex flex-col">
+			{
+				metadata.isNBT ? (
+					<TreeViewEditor
+						id={id}
+						isBedrock={false}
+						isDiff={metadata.isDiff}
+						filename={metadata.filename}
+						client:load
+					/>
+				) : (
+					<CodeEditor metadata={metadata} id={id} client:load />
+				)
+			}
 		</div>
 	</div>
 </BaseLayout>

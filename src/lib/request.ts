@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "astro:env/client";
-import { parse, stringify } from "json-bigint";
+import { parse, stringify } from "./jsonBigInt";
 import type { TreeTag, TreeTagContainerType } from "./treeView/types";
 
 export async function uploadFiles(id: string, file: File) {
@@ -118,7 +118,7 @@ export async function submitEdit(
 					? { compressionMethod: options.compressionMethod }
 					: {}),
 			})
-		: JSON.stringify({ action: "edit", editedContent: content });
+		: stringify({ action: "edit", editedContent: content });
 
 	const res = await fetch(API_BASE_URL + "/api/file/" + id, {
 		method: "POST",

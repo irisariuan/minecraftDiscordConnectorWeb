@@ -53,5 +53,5 @@ export async function serverSideGetViewFileMetadata(id: string) {
 export interface ViewFileMetadata {
 	filename: string;
 	content: string;
-	readonly: boolean;
+	isNbt: boolean;
 }

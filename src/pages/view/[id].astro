@@ -15,7 +15,7 @@ const fileName = metadata.filename;
 const parts = fileName.split(".");
 const fileExtension =
 	parts.length > 1 ? parts[parts.length - 1] || "txt" : "txt";
-const isNbt = fileExtension === "dat";
+const isNbt = metadata.isNbt;
 
 const title = "Viewing " + fileName;
 ---
@@ -44,6 +44,7 @@ const title = "Viewing " + fileName;
 					<ViewCodeEditor
 						id={id}
 						extension={fileExtension}
+						filename={fileName}
 						client:load
 					/>
 				)
