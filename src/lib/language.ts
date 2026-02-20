@@ -1,55 +1,55 @@
 export function decideLanguageFromExtension(extension: string): string {
 	switch (extension) {
-		case "js":
-		case "jsx":
+		case ".js":
+		case ".jsx":
 			return "javascript";
-		case "ts":
-		case "tsx":
+		case ".ts":
+		case ".tsx":
 			return "typescript";
-		case "py":
+		case ".py":
 			return "python";
-		case "java":
+		case ".java":
 			return "java";
-		case "rb":
+		case ".rb":
 			return "ruby";
-		case "go":
+		case ".go":
 			return "go";
-		case "rs":
+		case ".rs":
 			return "rust";
-		case "php":
+		case ".php":
 			return "php";
-		case "swift":
+		case ".swift":
 			return "swift";
-		case "kt":
-		case "kts":
+		case ".kt":
+		case ".kts":
 			return "kotlin";
-		case "cs":
+		case ".cs":
 			return "csharp";
-		case "cpp":
-		case "cc":
-		case "cxx":
-		case "c++":
-		case "h":
-		case "hpp":
+		case ".cpp":
+		case ".cc":
+		case ".cxx":
+		case ".c++":
+		case ".h":
+		case ".hpp":
 			return "cpp";
-		case "html":
-		case "htm":
+		case ".html":
+		case ".htm":
 			return "html";
-		case "css":
-		case "scss":
-		case "sass":
+		case ".css":
+		case ".scss":
+		case ".sass":
 			return "css";
-		case "json":
+		case ".json":
 			return "json";
-		case "md":
-		case "markdown":
+		case ".md":
+		case ".markdown":
 			return "markdown";
-		case "yaml":
-		case "yml":
+		case ".yaml":
+		case ".yml":
 			return "yaml";
-		case "xml":
+		case ".xml":
 			return "xml";
-		case "txt":
+		case ".txt":
 			return "plaintext";
 		default:
 			return "plaintext";

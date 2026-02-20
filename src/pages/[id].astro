@@ -1,7 +1,7 @@
 ---
 export const prerender = false;
 import BaseLayout from "../layouts/BaseLayout.astro";
-import UploadPlugin from "../components/UploadPlugin";
+import UploadEditor from "../components/UploadEditor";
 import { serverSideVerifyId } from "../lib/server/request";
 
 const { id } = Astro.params;
@@ -11,8 +11,28 @@ const result = await serverSideVerifyId(id);
 if (!result.valid || result.uploaded) return Astro.redirect("/error");
 ---
 
-<BaseLayout title="Upload Plugins">
-	<div class="w-full h-full flex flex-col">
-		<UploadPlugin id={id} client:load />
+<BaseLayout title="Upload File">
+	<div
+		class="dark:text-white text-black dark:bg-black bg-white flex flex-col h-full w-full"
+	>
+		<div
+			class="border-b dark:border-gray-700 border-gray-300 px-4 pt-4 pb-3"
+		>
+			<div class="flex items-center gap-3">
+				<h1 class="text-xl font-bold">Upload File</h1>
+				<span
+					class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+				>
+					Upload
+				</span>
+			</div>
+			<p class="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
+				Type or paste content directly, or import a local file via the
+				toolbar or by dragging it anywhere on the editor.
+			</p>
+		</div>
+		<div class="flex-1 flex flex-col overflow-hidden">
+			<UploadEditor id={id} client:load />
+		</div>
 	</div>
 </BaseLayout>

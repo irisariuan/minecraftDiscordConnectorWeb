@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "astro:env/client";
+import { parse, stringify } from "./jsonBigInt";
 import type { TreeTag, TreeTagContainerType } from "./treeView/types";
 
 export async function uploadFiles(id: string, file: File) {
@@ -43,7 +44,7 @@ export async function fetchEditingFile(
 	isNbt: boolean,
 	isBedrock: boolean,
 ): Promise<TreeTag<TreeTagContainerType> | string | null> {
-	const res = await fetch(API_BASE_URL + "/api/edit/" + id, {
+	const res = await fetch(API_BASE_URL + "/api/file/" + id, {
 		method: "POST",
 		mode: "cors",
 		headers: {
@@ -53,24 +54,77 @@ export async function fetchEditingFile(
 	});
 	if (!res.ok) return null;
 	if (isNbt) {
-		const data = await res.json();
+		const data = parse(await res.text()) as Record<string, unknown>;
 		if (!data.parsed) return null;
 		return data.parsed as TreeTag<TreeTagContainerType>;
 	}
 	return await res.text();
 }
 
+/**
+ * Fetches the NBT tree for editing, handling both plain-edit and diff-edit
+ * token types. Returns the editable tree plus the original tree when in diff
+ * mode.
+ */
+export async function fetchEditingNbtFile(
+	id: string,
+	isBedrock: boolean,
+): Promise<{
+	tag: TreeTag<TreeTagContainerType>;
+	original?: TreeTag<TreeTagContainerType>;
+} | null> {
+	const res = await fetch(API_BASE_URL + "/api/file/" + id, {
+		method: "POST",
+		mode: "cors",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ action: "fetch", parseNbt: true, isBedrock }),
+	});
+	if (!res.ok) return null;
+
+	const data = parse(await res.text()) as Record<string, unknown>;
+
+	// Diff token response: { edited: TreeTag, raw: TreeTag, rawBinary: string }
+	if (data.edited) {
+		return {
+			tag: data.edited as TreeTag<TreeTagContainerType>,
+			original: data.raw as TreeTag<TreeTagContainerType>,
+		};
+	}
+
+	// Non-diff token response: { parsed: TreeTag, raw: hexString }
+	if (data.parsed) {
+		return { tag: data.parsed as TreeTag<TreeTagContainerType> };
+	}
+
+	return null;
+}
+
 export async function submitEdit(
 	id: string,
 	content: string,
+	options?: {
+		isNbt?: boolean;
+		isBedrock?: boolean;
+		compressionMethod?: "gzip" | "zlib";
+	},
 ): Promise<boolean> {
-	const res = await fetch(API_BASE_URL + "/api/edit/" + id, {
+	const body = options?.isNbt
+		? stringify({
+				action: "edit",
+				editedContent: content,
+				isNbt: true,
+				isBedrock: options.isBedrock ?? false,
+				...(options.compressionMethod
+					? { compressionMethod: options.compressionMethod }
+					: {}),
+			})
+		: stringify({ action: "edit", editedContent: content });
+
+	const res = await fetch(API_BASE_URL + "/api/file/" + id, {
 		method: "POST",
 		mode: "cors",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({ action: "edit", editedContent: content }),
+		headers: { "Content-Type": "application/json" },
+		body,
 	});
 	return res.ok;
 }
@@ -84,12 +138,11 @@ export async function fetchViewFile(
 	content?: string;
 	error?: string;
 }> {
-	const url = new URL(API_BASE_URL + "/api/view/" + id);
-	url.searchParams.append("isNbt", isNbt ? "true" : "false");
+	const url = new URL(API_BASE_URL + "/api/file/" + id);
+	// The server reads "parseNbt", not "isNbt"
+	url.searchParams.append("parseNbt", isNbt ? "true" : "false");
 	url.searchParams.append("isBedrock", isBedrock ? "true" : "false");
-	const res = await fetch(url, {
-		mode: "cors",
-	});
+	const res = await fetch(url, { mode: "cors" });
 	if (!res.ok) {
 		if (res.status === 401) {
 			return { success: false, error: "Invalid or expired token" };
@@ -101,6 +154,32 @@ export async function fetchViewFile(
 	}
 	const data = await res.json();
 	return { success: true, content: data.content };
+}
+
+/**
+ * Fetches a read-only parsed NBT tree for a ViewToken.
+ * Returns the parsed tree and original filename.
+ */
+export async function fetchViewNbtFile(
+	id: string,
+	isBedrock: boolean,
+): Promise<{
+	tag: TreeTag<TreeTagContainerType>;
+	filename: string;
+} | null> {
+	const url = new URL(API_BASE_URL + "/api/file/" + id);
+	url.searchParams.append("parseNbt", "true");
+	url.searchParams.append("isBedrock", isBedrock ? "true" : "false");
+	const res = await fetch(url, { mode: "cors" });
+	if (!res.ok) return null;
+
+	// Server uses json-bigint stringify for NBT responses
+	const data = parse(await res.text()) as Record<string, unknown>;
+	if (!data.content || !data.filename) return null;
+	return {
+		tag: data.content as TreeTag<TreeTagContainerType>,
+		filename: data.filename as string,
+	};
 }
 
 export async function disposeFile(id: string): Promise<boolean> {
