@@ -15,7 +15,7 @@ export default function TreeViewBody({
 	diffAnnotations?: Map<TreeTag<TreeTagType>, DiffStatus>;
 }) {
 	return (
-		<div className="flex-1 bg-white dark:bg-black text-black dark:text-white p-2 max-w-full overflow-scroll">
+		<div className="flex-1 bg-white dark:bg-black text-black dark:text-white p-2 max-w-full">
 			<TreeViewTag
 				zIndex={0}
 				tag={data}
