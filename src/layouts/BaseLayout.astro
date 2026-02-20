@@ -1,6 +1,6 @@
 ---
 interface Props {
-	title: string
+	title: string;
 }
 import "@fontsource/poppins";
 import "../styles/global.css";
@@ -10,7 +10,10 @@ const { title } = Astro.props;
 <html lang="en" class="h-full w-full">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1, minimum-scale=1"
+		/>
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>

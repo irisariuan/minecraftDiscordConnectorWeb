@@ -12,9 +12,16 @@ import { useRef, useState, useCallback, useEffect } from "react";
  * shifts the coordinate origin for any `position: fixed` descendant away from
  * the viewport to the transformed ancestor's top-left corner.
  *
- * Returns the viewport-space offset of that ancestor (via
- * `getBoundingClientRect()`). When no such ancestor exists the offset is
- * (0, 0) and `position: fixed` behaves normally (relative to the viewport).
+ * When a transformed ancestor is found, returns its viewport-space offset
+ * (via `getBoundingClientRect()`).
+ *
+ * When **no** such ancestor exists, `position: fixed` is relative to the
+ * Initial Containing Block (layout viewport). On iOS Safari the virtual
+ * keyboard can scroll the visual viewport within the layout viewport, causing
+ * `getBoundingClientRect()` (visual-viewport coords) and `position: fixed`
+ * (layout-viewport coords) to diverge. We compensate by returning the
+ * negated `visualViewport` offset so the caller's subtraction
+ * (`rect - offset`) converts visual-viewport coords → layout-viewport coords.
  */
 function getFixedAncestorOffset(element: HTMLElement): {
 	x: number;
@@ -38,7 +45,17 @@ function getFixedAncestorOffset(element: HTMLElement): {
 		}
 		el = el.parentElement;
 	}
-	return { x: 0, y: 0 };
+	// No transformed ancestor → position:fixed is relative to the layout
+	// viewport (ICB).  getBoundingClientRect() returns visual-viewport
+	// coords.  On iOS Safari these diverge when the virtual keyboard is
+	// open because the visual viewport scrolls within the layout viewport.
+	// Return the negated offset so the caller's  `rect.top - offset.y`
+	// produces layout-viewport coordinates.
+	const vv = window.visualViewport;
+	return {
+		x: -(vv?.offsetLeft ?? 0),
+		y: -(vv?.offsetTop ?? 0),
+	};
 }
 
 export default function EditableDisplay({
@@ -153,7 +170,7 @@ export default function EditableDisplay({
 		const naturalWidth = measureNaturalWidth(value);
 		const containerWidth = wrapperRef.current.clientWidth;
 		if (naturalWidth !== undefined && naturalWidth > containerWidth) {
-			setExpandedWidth(naturalWidth + 6);
+			setExpandedWidth(naturalWidth + EDGE_MARGIN);
 		} else {
 			setExpandedWidth(undefined);
 		}
@@ -193,6 +210,16 @@ export default function EditableDisplay({
 
 	// ── Styles ────────────────────────────────────────────────────────────
 
+	// Cap width so the input never extends past the right edge of the
+	// screen.  fixedRect.left is in visual-viewport coords, so compare
+	// against the visual viewport width (falling back to window.innerWidth).
+	const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
+	const EDGE_MARGIN = 8; // px gap before the screen edge
+	const maxWidth = Math.max(
+		fixedRect?.width ?? 0,
+		viewportWidth - (fixedRect?.left ?? 0) - EDGE_MARGIN,
+	);
+
 	const expandedInputStyle: React.CSSProperties = fixedRect
 		? {
 				position: "fixed",
@@ -203,17 +230,18 @@ export default function EditableDisplay({
 				left: fixedRect.left - ancestorOffset.x,
 				height: fixedRect.height,
 				minWidth: fixedRect.width,
+				maxWidth,
 				boxSizing: "border-box",
-				zIndex: 99999,
+				zIndex: 10,
 				...(expandedWidth && expandedWidth > fixedRect.width
-					? { width: expandedWidth }
+					? { width: Math.min(expandedWidth, maxWidth) }
 					: {}),
 			}
 		: {};
 
 	const expandedInputClass =
 		"bg-white dark:bg-black " +
-		"shadow-[0_2px_8px_rgba(0,0,0,0.18)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.5)] " +
+		"shadow dark:shadow-neutral-700 shadow-neutral-900 " +
 		"ring-1 ring-inset ring-neutral-300 dark:ring-neutral-600 " +
 		"rounded-sm px-1";
 
@@ -239,6 +267,17 @@ export default function EditableDisplay({
 			onMouseLeave={() => {
 				isHovered.current = false;
 				collapse();
+			}}
+			onClick={async (e) => {
+				if (disabled) {
+					e.preventDefault();
+					ref.current?.select()
+					// copy to clipboard
+					if (text) {
+						await navigator.clipboard.writeText(text);
+					}
+					return;
+				}
 			}}
 		>
 			<label />
