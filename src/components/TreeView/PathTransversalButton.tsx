@@ -98,6 +98,10 @@ export default function PathTransversalButton({
 									placeholderText="(unnamed)"
 									className="placeholder:text-neutral-400 placeholder:italic"
 									overrideClassName
+									onDoubleClick={() => {
+										onSelectPath(tag, index);
+										setShowSelectPath(false);
+									}}
 								/>
 							</button>
 						);

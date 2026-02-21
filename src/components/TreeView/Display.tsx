@@ -66,7 +66,7 @@ export default function Display({
 	overrideClassName,
 	disabled,
 	placeholderText = "Nil",
-	onActiveClicked,
+	onDoubleClick,
 }: {
 	defaultValue?: string;
 	validate?: (input: string) => boolean;
@@ -76,9 +76,9 @@ export default function Display({
 	disabled?: boolean;
 	placeholderText?: string;
 	/*
-	 * On mobile, it would be activated by double-tap, on desktop by click.
+	 * Activate on mobile, disabled only
 	 */
-	onActiveClicked?: () => void;
+	onDoubleClick?: () => void;
 }) {
 	const ref = useRef<HTMLInputElement | null>(null);
 	const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -245,12 +245,30 @@ export default function Display({
 		: {};
 
 	const expandedInputClass =
-		"bg-white dark:bg-black " +
-		"shadow dark:shadow-neutral-700 shadow-neutral-900 " +
-		"ring-1 ring-inset ring-neutral-300 dark:ring-neutral-600 " +
+		"bg-white dark:bg-neutral-950 " +
+		"shadow dark:shadow-neutral-800 shadow-neutral-500 " +
 		"rounded-sm px-1";
 
 	const collapsedInputClass = "w-full truncate ";
+
+	const clickTimeout = useRef<NodeJS.Timeout | null>(null);
+	useEffect(() => {
+		return () => {
+			if (clickTimeout.current) clearTimeout(clickTimeout.current);
+		};
+	}, []);
+	function doubleClickHandler() {
+		if (!disabled) return
+		if (clickTimeout.current) {
+			clearTimeout(clickTimeout.current);
+			clickTimeout.current = null;
+			onDoubleClick?.();
+		} else {
+			clickTimeout.current = setTimeout(() => {
+				clickTimeout.current = null;
+			}, 300);
+		}
+	}
 
 	// ── Render ────────────────────────────────────────────────────────────
 
@@ -273,8 +291,11 @@ export default function Display({
 				isHovered.current = false;
 				collapse();
 			}}
+			onTouchStart={() => {
+				tryExpand(false);
+			}}
+			onTouchEnd={doubleClickHandler}
 		>
-			<label />
 			<input
 				ref={ref}
 				defaultValue={defaultValue}

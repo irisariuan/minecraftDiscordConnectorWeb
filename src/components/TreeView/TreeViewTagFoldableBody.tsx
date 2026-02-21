@@ -25,7 +25,7 @@ import {
 	useOverlayCloseSignal,
 } from "./OverlayContext";
 import Display from "./Display";
-import AddChildForm from "./AddChildForm";
+import AddChildForm, { TYPE_LABELS } from "./AddChildForm";
 import PathTransversalButton from "./PathTransversalButton";
 
 export default function TreeViewTagFoldableBody({
@@ -127,6 +127,9 @@ export default function TreeViewTagFoldableBody({
 						}}
 						defaultValue={tag.name}
 						disabled={viewOnly}
+						onDoubleClick={() => {
+							setShowChildren(true);
+						}}
 					/>
 				)}
 
@@ -223,7 +226,12 @@ export default function TreeViewTagFoldableBody({
 									? "0px"
 									: "16px 16px 0 0",
 							}}
-							exit={{ y: "100%" }}
+							exit={{
+								y: "100%",
+								scale: [1, 0],
+								filter: ["blur(0px)", "blur(100px)"],
+								opacity: [1, 0],
+							}}
 							transition={{
 								y: {
 									type: "spring",
@@ -252,7 +260,7 @@ export default function TreeViewTagFoldableBody({
 						>
 							{/* Sheet header */}
 							<div
-								className={`${bgColorRef[zIndex] ?? "bg-white dark:bg-neutral-900"} flex flex-col cursor-grab active:cursor-grabbing`}
+								className={`${bgColorRef[zIndex] ?? "bg-white dark:bg-neutral-900"} flex flex-col cursor-grab active:cursor-grabbing touch-none`}
 								onPointerDown={(e) => dragControls.start(e)}
 							>
 								{/* Drag handle pill */}
@@ -274,7 +282,9 @@ export default function TreeViewTagFoldableBody({
 									<span
 										className={`text-sm ${textColorRef[zIndex] ?? "text-neutral-400 dark:text-neutral-500"} shrink-0`}
 									>
-										{tag.type}
+										{TYPE_LABELS[
+											tag.type as TreeTagContainerType
+										] ?? tag.type}
 									</span>
 									<PathTransversalButton
 										title={

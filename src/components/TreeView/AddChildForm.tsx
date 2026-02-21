@@ -25,7 +25,7 @@ const ADDABLE_TYPES: AddableType[] = [
 	TreeTagContainerType.Compound,
 ];
 
-const TYPE_LABELS: Record<AddableType, string> = {
+export const TYPE_LABELS: Record<AddableType, string> = {
 	[TreeTagValueType.Byte]: "Byte",
 	[TreeTagValueType.ShortInt]: "Short",
 	[TreeTagValueType.Int]: "Int",
@@ -128,7 +128,7 @@ export default function AddChildForm({
 	}
 
 	return (
-		<div className="p-2 rounded bg-neutral-50 dark:bg-neutral-900 flex flex-col gap-2">
+		<div className="sticky bottom-0 left-0 m-1 p-2 rounded bg-neutral-50/50 dark:bg-neutral-900/50 backdrop-blur-2xl flex flex-col gap-2">
 			{/* Type selector */}
 			<div className="flex flex-wrap gap-1">
 				{ADDABLE_TYPES.map((type) => (
