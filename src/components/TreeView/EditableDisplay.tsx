@@ -68,8 +68,8 @@ export default function EditableDisplay({
 	placeholderText = "Nil",
 }: {
 	defaultValue?: string;
-	validate: (input: string) => boolean;
-	onSuccess: (input: string) => string;
+	validate?: (input: string) => boolean;
+	onSuccess?: (input: string) => string;
 	className?: string;
 	overrideClassName?: boolean;
 	disabled?: boolean;
@@ -317,13 +317,13 @@ export default function EditableDisplay({
 					setExpandedWidth(undefined);
 					setFixedRect(undefined);
 					if (inp.currentTarget.value === text) return;
-					if (!validate(inp.currentTarget.value)) {
+					if (!validate?.(inp.currentTarget.value)) {
 						inp.preventDefault();
 						if (!text) return;
 						inp.currentTarget.value = text;
 						return;
 					}
-					setText(onSuccess(inp.currentTarget.value));
+					setText(onSuccess?.(inp.currentTarget.value));
 				}}
 			/>
 		</div>

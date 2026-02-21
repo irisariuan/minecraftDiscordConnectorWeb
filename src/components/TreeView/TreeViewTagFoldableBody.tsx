@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { IoCaretDown, IoCaretUp, IoTrash, IoClose } from "react-icons/io5";
 import {
 	AnimatePresence,
@@ -19,9 +19,14 @@ import {
 } from "../../lib/treeView/types";
 import { diffBgClass, type DiffStatus } from "../../lib/treeView/diff";
 import { useIsNarrowScreen } from "../../hooks/useIsNarrowScreen";
-import { OverlayDepthContext, useOverlayDepth } from "./OverlayContext";
+import {
+	OverlayDepthContext,
+	useOverlayPath,
+	useOverlayCloseSignal,
+} from "./OverlayContext";
 import EditableDisplay from "./EditableDisplay";
 import AddChildForm from "./AddChildForm";
+import PathTransversalButton from "./PathTransversalButton";
 
 export default function TreeViewTagFoldableBody({
 	children,
@@ -45,7 +50,19 @@ export default function TreeViewTagFoldableBody({
 	onAddChild?: (item: string | number | TreeTag<TreeTagType>) => void;
 }) {
 	const isNarrow = useIsNarrowScreen();
-	const overlayDepth = useOverlayDepth();
+	const overlayPath = useOverlayPath();
+	const overlayDepth = overlayPath.length;
+	const closeSignal = useOverlayCloseSignal();
+
+	// Subscribe to the close signal so ancestor path traversal can close this sheet.
+	useEffect(() => {
+		return closeSignal.subscribe((targetDepth: number) => {
+			if (overlayDepth > targetDepth) {
+				setIsFullscreen(false);
+				setShowChildren(false);
+			}
+		});
+	}, [closeSignal, overlayDepth]);
 
 	// Start collapsed on narrow screens so no sheets auto-open on load.
 	const [showChildren, setShowChildren] = useState<boolean>(() => !isNarrow);
@@ -261,21 +278,33 @@ export default function TreeViewTagFoldableBody({
 									>
 										{tag.type}
 									</span>
-									<button
-										onClick={() =>
-											isFullscreen
-												? setIsFullscreen(false)
-												: setShowChildren(false)
-										}
-										className="shrink-0 ml-2 p-1 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-500 dark:text-neutral-400 transition-colors"
+									<PathTransversalButton
 										title={
 											isFullscreen
 												? "Exit fullscreen"
 												: "Close"
 										}
-									>
-										<IoClose className="h-5 w-5" />
-									</button>
+										onClick={() => {
+											isFullscreen
+												? setIsFullscreen(false)
+												: setShowChildren(false);
+										}}
+										onSelectPath={(_selectedTag, index) => {
+											const fullPath = [
+												...overlayPath,
+												tag,
+											];
+											// If the user selected the current tag (last in path), just close fullscreen or do nothing
+											if (index === fullPath.length - 1) {
+												if (isFullscreen)
+													setIsFullscreen(false);
+												return;
+											}
+											// Selected an ancestor — close all sheets deeper than the selected index
+											closeSignal.closeToDepth(index);
+										}}
+										path={[...overlayPath, tag]}
+									/>
 								</div>
 							</div>
 
@@ -283,7 +312,7 @@ export default function TreeViewTagFoldableBody({
 							    Provide depth + 1 so any nested foldable body that the
 							    user opens will stack its own sheet above this one. */}
 							<OverlayDepthContext.Provider
-								value={overlayDepth + 1}
+								value={[...overlayPath, tag]}
 							>
 								<div className="overflow-y-auto flex-1 px-3 py-2">
 									{children}
