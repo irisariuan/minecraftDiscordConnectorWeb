@@ -15,32 +15,38 @@ import {
 	type TreeTagType,
 } from "./types";
 
-export function getIcon(tagType: TreeTagType, className?: string): ReactNode {
+export function getIcon(
+	tagType: TreeTagType,
+	className?: string,
+	size?: number,
+): ReactNode {
 	switch (tagType) {
 		case TreeTagContainerType.ByteArray:
-			return <IoServer className={className} />;
+			return <IoServer className={className} size={size} />;
 		case TreeTagContainerType.Compound:
-			return <IoGrid className={className} />;
+			return <IoGrid className={className} size={size} />;
 		case TreeTagContainerType.IntArray:
 		case TreeTagContainerType.LongIntArray:
-			return <IoCalculator className={className} />;
+			return <IoCalculator className={className} size={size} />;
 		case TreeTagContainerType.List:
-			return <IoListCircle className={className} />;
+			return <IoListCircle className={className} size={size} />;
 		case TreeTagValueType.Byte:
-			return <IoToggle className={className} />;
+			return <IoToggle className={className} size={size} />;
 		case TreeTagValueType.String:
-			return <IoText className={className} />;
+			return <IoText className={className} size={size} />;
 		case TreeTagValueType.ShortInt:
 		case TreeTagValueType.LongInt:
 		case TreeTagValueType.Int:
-			return <TbNumber123 className={className} />;
+			return <TbNumber123 className={className} size={size} />;
 		case TreeTagValueType.Float:
 		case TreeTagValueType.DoubleFloat:
-			return <TbDecimal className={className} />;
+			return <TbDecimal className={className} size={size} />;
 		case TreeTagValueType.CompoundEnd:
-			return <IoCodeSlash className={className} />;
-		default:
-			return <TbQuestionMark className={className} />;
+			return <IoCodeSlash className={className} size={size} />;
+		default: {
+			console.error("Unknown tag type:", tagType);
+			return <TbQuestionMark className={className} size={size} />;
+		}
 	}
 }
 

@@ -45,7 +45,6 @@ export default function TreeViewEditor({
 		(async () => {
 			setMode(TreeEditorMode.FileLoading);
 			const result = await fetchEditingNbtFile(id, isBedrock);
-			console.log("fetched nbt", result?.tag);
 			if (!result) {
 				setError("Failed to load file");
 				setMode(TreeEditorMode.SubmitFailed);
