@@ -69,7 +69,7 @@ export default function PathTransversalButton({
 				onTouchCancel={cancelTimeout}
 				onTouchEnd={cancelTimeout}
 				ref={buttonRef}
-				className="shrink-0 ml-2 p-1 rounded-full hover:bg-neutral-200/50 dark:hover:bg-neutral-700/50 text-neutral-500 dark:text-neutral-400 transition-colors select-none touch-none cursor-pointer"
+				className="shrink-0 ml-2 p-1 rounded-full hover:bg-neutral-200/50 dark:hover:bg-neutral-700/50 text-neutral-500 dark:text-neutral-400 transition-colors select-none cursor-pointer"
 				title={title}
 			>
 				<IoClose className="h-5 w-5" />
