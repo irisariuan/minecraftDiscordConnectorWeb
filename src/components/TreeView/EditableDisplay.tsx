@@ -268,17 +268,6 @@ export default function EditableDisplay({
 				isHovered.current = false;
 				collapse();
 			}}
-			onClick={async (e) => {
-				if (disabled) {
-					e.preventDefault();
-					ref.current?.select()
-					// copy to clipboard
-					if (text) {
-						await navigator.clipboard.writeText(text);
-					}
-					return;
-				}
-			}}
 		>
 			<label />
 			<input
