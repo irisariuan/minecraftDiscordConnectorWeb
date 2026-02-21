@@ -252,13 +252,11 @@ export default function TreeViewTagFoldableBody({
 						>
 							{/* Sheet header */}
 							<div
-								className={`${bgColorRef[zIndex] ?? "bg-white dark:bg-neutral-900"} flex flex-col`}
+								className={`${bgColorRef[zIndex] ?? "bg-white dark:bg-neutral-900"} flex flex-col cursor-grab active:cursor-grabbing`}
+								onPointerDown={(e) => dragControls.start(e)}
 							>
 								{/* Drag handle pill */}
-								<div
-									className="flex justify-center pt-3 pb-4 shrink-0 cursor-grab active:cursor-grabbing touch-none select-none"
-									onPointerDown={(e) => dragControls.start(e)}
-								>
+								<div className="flex justify-center pt-3 pb-4 shrink-0 touch-none select-none">
 									<div className="w-1/5 h-1 rounded-full bg-neutral-300 dark:bg-neutral-600" />
 								</div>
 								{/* Actual Header */}
@@ -311,14 +309,12 @@ export default function TreeViewTagFoldableBody({
 							{/* Scrollable content.
 							    Provide depth + 1 so any nested foldable body that the
 							    user opens will stack its own sheet above this one. */}
-							<OverlayDepthContext.Provider
-								value={[...overlayPath, tag]}
-							>
+							<OverlayDepthContext value={[...overlayPath, tag]}>
 								<div className="overflow-y-auto flex-1 px-3 py-2">
 									{children}
 									{addForm}
 								</div>
-							</OverlayDepthContext.Provider>
+							</OverlayDepthContext>
 						</motion.div>
 					</>
 				)}
