@@ -24,7 +24,7 @@ import {
 	useOverlayPath,
 	useOverlayCloseSignal,
 } from "./OverlayContext";
-import EditableDisplay from "./EditableDisplay";
+import Display from "./Display";
 import AddChildForm from "./AddChildForm";
 import PathTransversalButton from "./PathTransversalButton";
 
@@ -119,7 +119,7 @@ export default function TreeViewTagFoldableBody({
 				</div>
 
 				{!noTitle && (
-					<EditableDisplay
+					<Display
 						validate={() => true}
 						onSuccess={(s) => {
 							updateTag({ ...tag, name: s });

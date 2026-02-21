@@ -2,7 +2,7 @@ import { IoClose } from "react-icons/io5";
 import type { TreeTag, TreeTagType } from "../../lib/treeView/types";
 import { useEffect, useRef, useState } from "react";
 import { getIcon } from "../../lib/treeView/component";
-import EditableDisplay from "./EditableDisplay";
+import Display from "./Display";
 
 export default function PathTransversalButton({
 	path,
@@ -92,7 +92,7 @@ export default function PathTransversalButton({
 								className={`flex items-center gap-2 w-full text-left my-1 rounded p-2 ${index === path.length - 1 ? "text-neutral-500 bg-neutral-200 dark:bg-neutral-800" : "text-neutral-600 dark:text-white hover:bg-neutral-200/60 dark:hover:bg-neutral-700/60"} text-sm`}
 							>
 								{getIcon(tag.type, "", 18)}
-								<EditableDisplay
+								<Display
 									disabled
 									defaultValue={tag.name}
 									placeholderText="(unnamed)"

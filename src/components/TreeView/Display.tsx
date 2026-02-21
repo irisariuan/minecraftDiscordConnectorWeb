@@ -58,7 +58,7 @@ function getFixedAncestorOffset(element: HTMLElement): {
 	};
 }
 
-export default function EditableDisplay({
+export default function Display({
 	defaultValue,
 	validate,
 	className,
@@ -66,6 +66,7 @@ export default function EditableDisplay({
 	overrideClassName,
 	disabled,
 	placeholderText = "Nil",
+	onActiveClicked,
 }: {
 	defaultValue?: string;
 	validate?: (input: string) => boolean;
@@ -74,6 +75,10 @@ export default function EditableDisplay({
 	overrideClassName?: boolean;
 	disabled?: boolean;
 	placeholderText?: string;
+	/*
+	 * On mobile, it would be activated by double-tap, on desktop by click.
+	 */
+	onActiveClicked?: () => void;
 }) {
 	const ref = useRef<HTMLInputElement | null>(null);
 	const wrapperRef = useRef<HTMLDivElement | null>(null);

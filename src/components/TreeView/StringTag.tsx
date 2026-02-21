@@ -6,7 +6,7 @@ import {
 	type TreeTagType,
 } from "../../lib/treeView/types";
 import { getRelativeTagType } from "../../lib/treeView/utils";
-import EditableDisplay from "./EditableDisplay";
+import Display from "./Display";
 import TreeViewTagBody from "./TreeViewTagBody";
 
 export default function StringTag({
@@ -50,7 +50,7 @@ export default function StringTag({
 			diffStatus={diffStatus}
 			onDelete={onDelete}
 		>
-			<EditableDisplay
+			<Display
 				className="text-sm text-neutral-600 dark:text-neutral-400"
 				defaultValue={value}
 				validate={(inp) => inp.match(/^[\d]+$/) !== null}

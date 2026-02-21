@@ -7,7 +7,7 @@ import {
 } from "../../lib/treeView/types";
 import { diffBgClass, type DiffStatus } from "../../lib/treeView/diff";
 import { getIcon } from "../../lib/treeView/component";
-import EditableDisplay from "./EditableDisplay";
+import Display from "./Display";
 
 export default function TreeViewTagBody({
 	children,
@@ -38,7 +38,7 @@ export default function TreeViewTagBody({
 			</div>
 			<div className="flex flex-col justify-center flex-1 min-w-0">
 				{tag.type !== TreeTagValueType.CompoundEnd && !noTitle && (
-					<EditableDisplay
+					<Display
 						onSuccess={onSuccess}
 						validate={() => true}
 						defaultValue={tag.name}

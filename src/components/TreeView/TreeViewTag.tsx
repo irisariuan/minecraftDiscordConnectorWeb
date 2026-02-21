@@ -15,7 +15,7 @@ import {
 	isValue,
 	withinRange,
 } from "../../lib/treeView/utils";
-import EditableDisplay from "./EditableDisplay";
+import Display from "./Display";
 import NumberTag from "./NumberTag";
 import StringTag from "./StringTag";
 import TreeViewTagBody from "./TreeViewTagBody";
@@ -564,7 +564,7 @@ export default function TreeViewTag({
 					onDelete={onDelete}
 				>
 					<div className="m-1">
-						<EditableDisplay
+						<Display
 							className="text-sm text-neutral-600 dark:text-neutral-400"
 							defaultValue={(tag.value as number)
 								.toString(16)
@@ -596,7 +596,7 @@ export default function TreeViewTag({
 					onDelete={onDelete}
 				>
 					<div className="m-1">
-						<EditableDisplay
+						<Display
 							className="text-sm text-neutral-600 dark:text-neutral-400"
 							defaultValue={tag.value?.toString()}
 							validate={() => true}
@@ -628,7 +628,7 @@ export default function TreeViewTag({
 					onDelete={onDelete}
 				>
 					<div className="m-1">
-						<EditableDisplay
+						<Display
 							className="text-sm text-neutral-600 dark:text-neutral-400"
 							defaultValue={tag.value?.toString()}
 							validate={(data) =>
