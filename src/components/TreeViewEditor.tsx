@@ -2,13 +2,19 @@ import { useEffect, useRef, useState } from "react";
 import { MdVerticalSplit, MdViewAgenda } from "react-icons/md";
 import { fetchEditingNbtFile, submitEdit } from "../lib/request";
 import { parse, stringify } from "../lib/jsonBigInt";
-import { type TreeTag, type TreeTagType } from "../lib/treeView/types";
+import {
+	TreeTagContainerType,
+	type TreeTag,
+	type TreeTagType,
+} from "../lib/treeView/types";
 import ErrorState from "./states/ErrorState";
 import LoadingState from "./states/LoadingState";
 import NavBar from "./TreeView/NavBar";
 import TreeViewBody from "./TreeView/TreeViewBody";
 import { computeDiffMaps, type DiffMaps } from "../lib/treeView/diff";
 import { CompressionMethod } from "./TreeView/CompressSelect";
+import AddChildForm, { createDefaultTag } from "./TreeView/AddChildForm";
+import { getIcon } from "../lib/treeView/component";
 
 export enum TreeEditorMode {
 	FileLoading,
@@ -21,17 +27,16 @@ export enum TreeEditorMode {
 
 export default function TreeViewEditor({
 	id,
-	isBedrock,
 	isDiff,
 	filename,
 }: {
 	id: string;
-	isBedrock: boolean;
 	isDiff: boolean;
 	filename?: string;
 }) {
 	const [compressionMethod, setCompressionMethod] =
 		useState<CompressionMethod>(CompressionMethod.Gzip);
+	const [isBedrock, setIsBedrock] = useState<boolean | null>(null);
 	const [mode, setMode] = useState(TreeEditorMode.FileLoading);
 	const [tag, setTag] = useState<TreeTag<TreeTagType> | null>(null);
 	const [originalTag, setOriginalTag] = useState<TreeTag<TreeTagType> | null>(
@@ -45,6 +50,7 @@ export default function TreeViewEditor({
 	const uploadInputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
+		if (isBedrock === null) return; // Wait for platform selection
 		(async () => {
 			setMode(TreeEditorMode.FileLoading);
 			const result = await fetchEditingNbtFile(id, isBedrock);
@@ -69,7 +75,7 @@ export default function TreeViewEditor({
 	}, [tag, originalTag, isDiff]);
 
 	async function handleSubmit() {
-		if (!tag || mode !== TreeEditorMode.Edit) return;
+		if (!tag || mode !== TreeEditorMode.Edit || isBedrock === null) return;
 		setMode(TreeEditorMode.Submitting);
 		const ok = await submitEdit(id, stringify(tag), {
 			isNbt: true,
@@ -140,7 +146,29 @@ export default function TreeViewEditor({
 				onChange={handleFileSelected}
 			/>
 
-			{mode === TreeEditorMode.FileLoading && <LoadingState />}
+			{mode === TreeEditorMode.FileLoading && (
+				<div className="w-full h-full flex items-center justify-center">
+					<div className="dark:bg-neutral-800 bg-white border dark:border-neutral-700 border-neutral-200 rounded-2xl p-8 flex flex-col items-center gap-3 max-w-4/5 lg:max-w-1/3 w-full mx-4 shadow-lg overflow-hidden">
+						<h1 className="text-2xl font-bold text-neutral-500">
+							Choose platform
+						</h1>
+						<div className="flex gap-2 w-full flex-wrap flex-col md:flex-row justify-center items-center">
+							<button
+								onClick={() => setIsBedrock(false)}
+								className="flex-1 w-full px-4 py-2 rounded-2xl bg-blue-500 hover:bg-blue-600 dark:text-blue-500 dark:bg-blue-900 dark:hover:bg-blue-500 active:bg-blue-700 dark:hover:text-blue-50 border border-blue-600 shadow-lg text-white transition-colors cursor-pointer"
+							>
+								Java Edition
+							</button>
+							<button
+								onClick={() => setIsBedrock(true)}
+								className="flex-1 w-full px-4 py-2 rounded-2xl bg-green-500 hover:bg-green-600 dark:text-green-600 dark:bg-green-900 dark:hover:bg-green-500 active:bg-green-700 dark:hover:text-green-50 border border-green-600 shadow-lg text-white transition-colors cursor-pointer"
+							>
+								Bedrock Edition
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 
 			{mode !== TreeEditorMode.FileLoading && tag !== null && (
 				<>
@@ -271,6 +299,48 @@ export default function TreeViewEditor({
 					</div>
 				</>
 			)}
+			{mode === TreeEditorMode.Edit && tag === null && (
+				<div className="w-full h-full flex items-center justify-center">
+					<div className="dark:bg-neutral-800 bg-white border dark:border-neutral-700 border-neutral-200 rounded-2xl p-8 flex flex-col items-center gap-3 max-w-4/5 lg:max-w-1/3 w-full mx-4 shadow-lg overflow-hidden">
+						<h1 className="text-2xl font-bold text-neutral-500">
+							Choose tag type for new file
+						</h1>
+						<div className="flex gap-2 w-full flex-wrap flex-col md:flex-row justify-center items-center">
+							<button
+								onClick={() =>
+									setTag(
+										createDefaultTag(
+											TreeTagContainerType.List,
+											"",
+										),
+									)
+								}
+								className="flex-1 w-full flex justify-center items-center gap-1 text-lg px-4 py-2 rounded-2xl bg-blue-500 hover:bg-blue-600 dark:text-blue-600 dark:bg-blue-900 dark:hover:bg-blue-500 dark:hover:text-blue-50 border border-blue-600 shadow-lg text-white transition-colors cursor-pointer"
+							>
+								{getIcon(TreeTagContainerType.List)}
+								<span>List</span>
+							</button>
+							<button
+								onClick={() =>
+									setTag(
+										createDefaultTag(
+											TreeTagContainerType.Compound,
+											"",
+										),
+									)
+								}
+								className="flex-1 w-full flex justify-center items-center gap-1 text-lg px-4 py-2 rounded-2xl bg-green-500 hover:bg-green-600 dark:text-green-600 dark:bg-green-900 dark:hover:bg-green-500 dark:hover:text-green-50 border border-green-600 shadow-lg text-white transition-colors cursor-pointer"
+							>
+								{getIcon(TreeTagContainerType.Compound)}
+								<span>Compound</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+			{mode !== TreeEditorMode.Edit &&
+				mode !== TreeEditorMode.FileLoading &&
+				tag === null && <ErrorState errorMessage="No tag found" />}
 		</div>
 	);
 }

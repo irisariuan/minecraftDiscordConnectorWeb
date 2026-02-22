@@ -29,35 +29,16 @@ export async function fetchFile(id: string) {
 	}
 }
 
-export async function fetchEditingFile(
-	id: string,
-	isNbt: true,
-	isBedrock: boolean,
-): Promise<TreeTag<TreeTagContainerType> | null>;
-export async function fetchEditingFile(
-	id: string,
-	isNbt: false,
-	isBedrock: boolean,
-): Promise<string | null>;
-export async function fetchEditingFile(
-	id: string,
-	isNbt: boolean,
-	isBedrock: boolean,
-): Promise<TreeTag<TreeTagContainerType> | string | null> {
+export async function fetchEditingFile(id: string): Promise<string | null> {
 	const res = await fetch(API_BASE_URL + "/api/file/" + id, {
 		method: "POST",
 		mode: "cors",
 		headers: {
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify({ action: "fetch", parseNbt: isNbt, isBedrock }),
+		body: JSON.stringify({ action: "fetch", parseNbt: false }),
 	});
 	if (!res.ok) return null;
-	if (isNbt) {
-		const data = parse(await res.text()) as Record<string, unknown>;
-		if (!data.parsed) return null;
-		return data.parsed as TreeTag<TreeTagContainerType>;
-	}
 	return await res.text();
 }
 
@@ -70,8 +51,8 @@ export async function fetchEditingNbtFile(
 	id: string,
 	isBedrock: boolean,
 ): Promise<{
-	tag: TreeTag<TreeTagContainerType>;
-	original?: TreeTag<TreeTagContainerType>;
+	tag: TreeTag<TreeTagContainerType> | null;
+	original?: TreeTag<TreeTagContainerType> | null;
 } | null> {
 	const res = await fetch(API_BASE_URL + "/api/file/" + id, {
 		method: "POST",
@@ -81,22 +62,24 @@ export async function fetchEditingNbtFile(
 	});
 	if (!res.ok) return null;
 
-	const data = parse(await res.text()) as Record<string, unknown>;
+	const data = parse(await res.text()) as  // raw / rawBinary is binary in hex form
+		| {
+				edited: TreeTag<TreeTagContainerType>;
+				raw: TreeTag<TreeTagContainerType> | null;
+				rawBinary?: string;
+		  }
+		| { parsed: TreeTag<TreeTagContainerType> | null; raw?: string };
 
-	// Diff token response: { edited: TreeTag, raw: TreeTag, rawBinary: string }
-	if (data.edited) {
+	// Diff token response
+	if ("edited" in data) {
 		return {
-			tag: data.edited as TreeTag<TreeTagContainerType>,
-			original: data.raw as TreeTag<TreeTagContainerType>,
+			tag: data.edited,
+			original: data.raw,
 		};
 	}
 
-	// Non-diff token response: { parsed: TreeTag, raw: hexString }
-	if (data.parsed) {
-		return { tag: data.parsed as TreeTag<TreeTagContainerType> };
-	}
-
-	return null;
+	// Non-diff token response:
+	return { tag: data.parsed };
 }
 
 export async function submitEdit(

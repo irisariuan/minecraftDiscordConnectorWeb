@@ -50,7 +50,7 @@ export default function CodeEditor({
 	useEffect(() => {
 		(async () => {
 			setEditorMode(EditorMode.FileLoading);
-			const fileContent = await fetchEditingFile(id, false, false);
+			const fileContent = await fetchEditingFile(id);
 			if (fileContent === null) {
 				window.location.href = "/edit/error";
 				return;

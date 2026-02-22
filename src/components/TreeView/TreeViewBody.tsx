@@ -20,7 +20,6 @@ export default function TreeViewBody({
 				zIndex={0}
 				tag={data}
 				updateTag={setData}
-				noTitle
 				viewOnly={viewOnly}
 				diffAnnotations={diffAnnotations}
 			/>

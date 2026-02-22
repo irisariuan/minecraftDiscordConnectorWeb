@@ -108,7 +108,7 @@ export default function AddChildForm({
 
 	function handleConfirm() {
 		if (!canConfirm) return;
-		onAdd(createDefaultTag(selectedType, name.trim() || "item"));
+		onAdd(createDefaultTag(selectedType, name.trim()));
 		setName("");
 		setOpen(false);
 	}
@@ -172,6 +172,7 @@ export default function AddChildForm({
 				<button
 					disabled={!canConfirm}
 					onClick={handleConfirm}
+					title="Add Tag"
 					className="flex flex-1 justify-center items-center gap-1 p-2 rounded-xl bg-green-500 text-green-100 hover:bg-green-300 hover:text-green-500 dark:hover:bg-green-800 dark:hover:text-green-400 not-disabled:hover:cursor-pointer disabled:opacity-40 transition-colors"
 				>
 					<IoAdd className="h-4 w-4" />
@@ -179,6 +180,7 @@ export default function AddChildForm({
 				</button>
 				<button
 					onClick={handleCancel}
+					title="Cancel"
 					className="flex flex-1 justify-center items-center gap-1 p-2 rounded-xl bg-neutral-200 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-300 hover:bg-neutral-300 dark:hover:bg-neutral-600 not-disabled:hover:cursor-pointer transition-colors"
 				>
 					<IoClose className="h-4 w-4" />

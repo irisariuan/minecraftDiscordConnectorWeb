@@ -22,7 +22,7 @@ export default function Display({
 	overrideClassName?: boolean;
 	disabled?: boolean;
 	placeholderText?: string;
-		enableToolbar?: boolean;
+	enableToolbar?: boolean;
 	toolbarElement?: React.ReactNode;
 	/*
 	 * Activate on mobile, disabled only
@@ -215,6 +215,25 @@ export default function Display({
 			}, 300);
 		}
 	}
+	const handleClickOutside = useCallback(
+		(event: MouseEvent | TouchEvent) => {
+			if (
+				wrapperRef.current &&
+				!wrapperRef.current.contains(event.target as Node)
+			) {
+				setShowToolbar(false);
+			}
+		},
+		[wrapperRef.current, setShowToolbar],
+	);
+	useEffect(() => {
+		document.addEventListener("mousedown", handleClickOutside);
+		document.addEventListener("touchstart", handleClickOutside);
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener("touchstart", handleClickOutside);
+		};
+	}, []);
 
 	// ── Render ────────────────────────────────────────────────────────────
 
@@ -255,7 +274,8 @@ export default function Display({
 							? className
 							: `outline-0 block ` +
 								(isExpanded
-									? expandedInputClass + ' overflow-x-scroll text-nowrap'
+									? expandedInputClass +
+										" overflow-x-scroll text-nowrap"
 									: collapsedInputClass) +
 								(!defaultValue
 									? " text-red-500 dark:text-red-400 italic"
@@ -318,7 +338,6 @@ export default function Display({
 						<div className="absolute box-border py-2 mt-4 rounded z-10 flex flex-wrap justify-center gap-2 items-center top-0">
 							{toolbarElement}
 							<ToolBarButton
-								className="hover:text-blue-500 active:text-blue-800"
 								onClick={() => {
 									try {
 										navigator.clipboard
@@ -337,7 +356,6 @@ export default function Display({
 							{!disabled && (
 								<>
 									<ToolBarButton
-										className="hover:text-green-500 active:text-green-800"
 										onClick={() => {
 											if (
 												!ref.current ||
@@ -367,7 +385,6 @@ export default function Display({
 									</ToolBarButton>
 
 									<ToolBarButton
-										className="hover:text-red-500 active:text-red-800"
 										onClick={() => {
 											if (
 												!ref.current ||
