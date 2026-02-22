@@ -1,6 +1,6 @@
 import { AnimatePresence } from "motion/react";
 import { useRef, useState, useCallback, useEffect } from "react";
-import { IoCopy, IoCut, IoTrash } from "react-icons/io5";
+import { IoCopy, IoCut, IoEnter, IoTrash } from "react-icons/io5";
 import ToolBarButton from "./ToolBarButton";
 
 export default function Display({
@@ -382,6 +382,36 @@ export default function Display({
 										}}
 									>
 										<IoCut />
+									</ToolBarButton>
+									<ToolBarButton
+										onClick={async () => {
+											if (
+												!ref.current ||
+												!(
+													ref.current instanceof
+													HTMLInputElement
+												)
+											)
+												return;
+											try {
+												const text =
+													await navigator.clipboard
+														.readText()
+														.catch(() => null);
+												if (!text) return;
+												ref.current.value += text;
+												setText(text);
+												ref.current.focus();
+												handleInput();
+											} catch (e) {
+												console.error(
+													"Clipboard API not supported",
+													e,
+												);
+											}
+										}}
+									>
+										<IoEnter />
 									</ToolBarButton>
 
 									<ToolBarButton

@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, type RefObject } from "react";
 import type { TreeTag, TreeTagType } from "../../lib/treeView/types";
 
 /**
@@ -19,33 +19,105 @@ export function useOverlayPath(): TreeTag<TreeTagType>[] {
 }
 
 /**
- * A simple pub/sub signal that allows a deeply-nested sheet to tell all
- * ancestor sheets at depth > targetDepth to close themselves, enabling
- * multi-layer path traversal in a single action.
+ * Unified overlay signal that combines close-to-depth broadcasting with
+ * active-depth tracking. Every open sheet registers/unregisters itself so
+ * ancestors can detect children above them (for zoom-out animations), and
+ * any sheet can broadcast a close-to-depth event so deeply-nested sheets
+ * can collapse in a single action.
  */
-export class OverlayCloseSignal {
-	private listeners = new Set<(targetDepth: number) => void>();
+export class OverlaySignal {
+	/* ── close-to-depth ─────────────────────────────────────────────── */
+	private closeListeners = new Set<(targetDepth: number) => void>();
 
-	/** Register a callback. Returns an unsubscribe function. */
-	subscribe(callback: (targetDepth: number) => void): () => void {
-		this.listeners.add(callback);
+	/** Register a close callback. Returns an unsubscribe function. */
+	subscribeClose(callback: (targetDepth: number) => void): () => void {
+		this.closeListeners.add(callback);
 		return () => {
-			this.listeners.delete(callback);
+			this.closeListeners.delete(callback);
 		};
 	}
 
 	/** Close every sheet whose depth > targetDepth. */
 	closeToDepth(targetDepth: number): void {
-		this.listeners.forEach((cb) => cb(targetDepth));
+		this.closeListeners.forEach((cb) => cb(targetDepth));
+	}
+
+	/* ── active-depth tracking ──────────────────────────────────────── */
+	private depthCounts = new Map<number, number>();
+	private activeListeners = new Set<() => void>();
+
+	/** Register an active sheet at the given depth. */
+	register(depth: number): void {
+		this.depthCounts.set(depth, (this.depthCounts.get(depth) || 0) + 1);
+		this.notifyActive();
+	}
+
+	/** Unregister an active sheet at the given depth. */
+	unregister(depth: number): void {
+		const count = (this.depthCounts.get(depth) || 1) - 1;
+		if (count <= 0) this.depthCounts.delete(depth);
+		else this.depthCounts.set(depth, count);
+		this.notifyActive();
+	}
+
+	/** Subscribe to active-depth changes. Returns an unsubscribe function. */
+	subscribeActive(callback: () => void): () => void {
+		this.activeListeners.add(callback);
+		return () => {
+			this.activeListeners.delete(callback);
+		};
+	}
+
+	/** Check whether any sheet at a depth strictly above `depth` is active. */
+	hasDepthAbove(depth: number): boolean {
+		for (const d of this.depthCounts.keys()) {
+			if (d > depth) return true;
+		}
+		return false;
+	}
+
+	/** Return the maximum currently-active depth, or -1 if none. */
+	maxDepth(): number {
+		let max = -1;
+		for (const d of this.depthCounts.keys()) {
+			if (d > max) max = d;
+		}
+		return max;
+	}
+
+	/**
+	 * How many active overlay levels sit above `depth`.
+	 * 0 means this is the topmost sheet (or no children are open).
+	 */
+	levelsAbove(depth: number): number {
+		const max = this.maxDepth();
+		if (max <= depth) return 0;
+		return max - depth;
+	}
+
+	private notifyActive(): void {
+		this.activeListeners.forEach((cb) => cb());
 	}
 }
 
 /** Module-level default so every tree on the page shares one signal. */
-const defaultCloseSignal = new OverlayCloseSignal();
+const defaultSignal = new OverlaySignal();
 
-export const OverlayCloseContext =
-	createContext<OverlayCloseSignal>(defaultCloseSignal);
+export const OverlaySignalContext = createContext<OverlaySignal>(defaultSignal);
 
-export function useOverlayCloseSignal(): OverlayCloseSignal {
-	return useContext(OverlayCloseContext);
+export function useOverlaySignal(): OverlaySignal {
+	return useContext(OverlaySignalContext);
+}
+
+/**
+ * Provides a portal container element that lives inside the React/Astro island.
+ * Sheets portal into this container instead of `document.body` so they escape
+ * ancestor CSS transforms (which break position:fixed) without leaving the island.
+ */
+export const OverlayPortalContext =
+	createContext<RefObject<HTMLDivElement | null> | null>(null);
+
+export function useOverlayPortal(): HTMLDivElement | null {
+	const ref = useContext(OverlayPortalContext);
+	return ref?.current ?? null;
 }

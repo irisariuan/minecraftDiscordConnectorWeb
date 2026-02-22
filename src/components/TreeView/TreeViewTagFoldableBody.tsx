@@ -1,4 +1,11 @@
-import { useEffect, useState, type ReactNode } from "react";
+import {
+	useEffect,
+	useRef,
+	useState,
+	useSyncExternalStore,
+	type ReactNode,
+} from "react";
+import { createPortal } from "react-dom";
 import { IoCaretDown, IoCaretUp, IoTrash } from "react-icons/io5";
 import { LuFileJson2 } from "react-icons/lu";
 import {
@@ -25,7 +32,8 @@ import { useIsNarrowScreen } from "../../hooks/useIsNarrowScreen";
 import {
 	OverlayDepthContext,
 	useOverlayPath,
-	useOverlayCloseSignal,
+	useOverlaySignal,
+	useOverlayPortal,
 } from "./OverlayContext";
 import Display from "./Display";
 import AddChildForm, { isAddableType, TYPE_LABELS } from "./AddChildForm";
@@ -55,24 +63,56 @@ export default function TreeViewTagFoldableBody({
 	onDelete?: () => void;
 	onAddChild?: (item: string | number | TreeTag<TreeTagType>) => void;
 }) {
-	const isNarrow = useIsNarrowScreen();
+	const rootRef = useRef<HTMLDivElement | null>(null);
+	const isNarrow = useIsNarrowScreen(rootRef);
 	const overlayPath = useOverlayPath();
 	const overlayDepth = overlayPath.length;
-	const closeSignal = useOverlayCloseSignal();
+	const overlaySignal = useOverlaySignal();
+	const portalContainer = useOverlayPortal();
 
 	// Subscribe to the close signal so ancestor path traversal can close this sheet.
 	useEffect(() => {
-		return closeSignal.subscribe((targetDepth: number) => {
+		return overlaySignal.subscribeClose((targetDepth: number) => {
 			if (overlayDepth > targetDepth) {
 				setIsFullscreen(false);
 				setShowChildren(false);
 			}
 		});
-	}, [closeSignal, overlayDepth]);
+	}, [overlaySignal, overlayDepth]);
 
 	// Start collapsed on narrow screens so no sheets auto-open on load.
 	const [showChildren, setShowChildren] = useState<boolean>(() => !isNarrow);
+
+	// When the narrow state changes (e.g. window resize, split-pane drag),
+	// collapse children so sheets don't randomly pop up.
+	const prevNarrowRef = useRef(isNarrow);
+	useEffect(() => {
+		if (prevNarrowRef.current !== isNarrow) {
+			prevNarrowRef.current = isNarrow;
+			setShowChildren(false);
+		}
+	}, [isNarrow]);
 	const [isFullscreen, setIsFullscreen] = useState(false);
+
+	const useOverlayFlag = isNarrow && showChildren;
+
+	// Register / unregister this sheet with the overlay signal
+	// so that parent sheets can detect a child overlay on top of them.
+	useEffect(() => {
+		if (useOverlayFlag) {
+			overlaySignal.register(overlayDepth);
+			return () => overlaySignal.unregister(overlayDepth);
+		}
+	}, [useOverlayFlag, overlayDepth, overlaySignal]);
+
+	// Reactively track how many overlay levels are stacked above this sheet.
+	// 0 = this is the topmost sheet, 1 = one child above, 2 = two above, etc.
+	const levelsAbove = useSyncExternalStore(
+		(cb) => overlaySignal.subscribeActive(cb),
+		() => overlaySignal.levelsAbove(overlayDepth),
+	);
+
+	const isTopSheet = levelsAbove === 0;
 
 	const dragControls = useDragControls();
 
@@ -84,7 +124,7 @@ export default function TreeViewTagFoldableBody({
 	const backdropZ = 40 + overlayDepth * 10;
 	const sheetZ = backdropZ + 1;
 
-	const useOverlay = isNarrow && showChildren;
+	const useOverlay = useOverlayFlag;
 
 	const addForm =
 		!viewOnly && onAddChild ? (
@@ -117,7 +157,7 @@ export default function TreeViewTagFoldableBody({
 	}
 
 	return (
-		<div title={tag.type} className="my-1">
+		<div ref={rootRef} title={tag.type} className="my-1">
 			{/* Header row */}
 			<div className={`flex items-center gap-1 rounded ${bgClass}`}>
 				<div className="flex items-center justify-center p-1 bg-neutral-200 dark:bg-neutral-800 rounded text-neutral-600 dark:text-neutral-500 shrink-0">
@@ -210,7 +250,7 @@ export default function TreeViewTagFoldableBody({
 								className={`min-h-full rounded w-8 my-1 ${bgColorRef[zIndex] ?? ""}`}
 							/>
 							<div
-								className={`ml-2 border-l border-b rounded-bl-xl px-2 max-w-full overflow-x-scroll ${borderColorRef[zIndex] ?? ""}`}
+								className={`flex-1 ml-2 border-l border-b rounded-bl-xl px-2 max-w-full w-max overflow-x-scroll ${borderColorRef[zIndex] ?? ""}`}
 							>
 								{children}
 								{addForm}
@@ -220,166 +260,228 @@ export default function TreeViewTagFoldableBody({
 				)}
 			</AnimatePresence>
 
-			{/* Bottom-sheet overlay (narrow screens, stacked drill-down) */}
-			<AnimatePresence
-				onExitComplete={() => {
-					// Reset fullscreen when the sheet has fully exited
-					setIsFullscreen(false);
-				}}
-			>
-				{useOverlay && (
-					<>
-						{/* Backdrop */}
-						<motion.div
-							key="backdrop"
-							className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-							style={{ zIndex: backdropZ }}
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							exit={{ opacity: 0 }}
-							transition={{ duration: 0.25, ease: "easeOut" }}
-							onClick={() => setShowChildren(false)}
-						/>
+			{/* Bottom-sheet overlay (narrow screens, stacked drill-down).
+			    Portal into the island-local container so the sheet escapes
+			    ancestor CSS transforms (which break position:fixed) without
+			    leaving the Astro island. AnimatePresence lives inside the
+			    portal so exit animations work reliably. */}
+			{portalContainer &&
+				createPortal(
+					<AnimatePresence
+						onExitComplete={() => {
+							// Reset fullscreen when the sheet has fully exited
+							setIsFullscreen(false);
+						}}
+					>
+						{useOverlay && (
+							<>
+								{/* Backdrop */}
+								<motion.div
+									key="backdrop"
+									className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+									style={{ zIndex: backdropZ }}
+									initial={{ opacity: 0 }}
+									animate={{ opacity: 1 }}
+									exit={{ opacity: 0 }}
+									transition={{
+										duration: 0.25,
+										ease: "easeOut",
+									}}
+									onClick={() => setShowChildren(false)}
+								/>
 
-						{/* Sheet */}
-						<motion.div
-							key="sheet"
-							className="fixed bottom-0 left-0 right-0 flex flex-col bg-white dark:bg-neutral-900 shadow-2xl overflow-hidden"
-							style={{ zIndex: sheetZ }}
-							// Enter / exit
-							initial={{ y: "100%" }}
-							animate={{
-								y: 0,
-								height: isFullscreen ? "100dvh" : "80vh",
-								borderRadius: isFullscreen
-									? "0px"
-									: "16px 16px 0 0",
-							}}
-							exit={{
-								y: "100%",
-								scale: [1, 0],
-								filter: ["blur(0px)", "blur(100px)"],
-								opacity: [1, 0],
-							}}
-							transition={{
-								y: {
-									type: "spring",
-									stiffness: 400,
-									damping: 40,
-									mass: 1,
-								},
-								height: {
-									type: "spring",
-									stiffness: 350,
-									damping: 35,
-								},
-								borderRadius: {
-									duration: 0.25,
-									ease: "easeInOut",
-								},
-							}}
-							// Drag — only initiated from the handle below
-							drag="y"
-							dragListener={false}
-							dragControls={dragControls}
-							dragConstraints={{ top: 0, bottom: 0 }}
-							dragElastic={{ top: 0.15, bottom: 0.4 }}
-							dragMomentum={false}
-							onDragEnd={handleDragEnd}
-						>
-							{/* Sheet header */}
-							<div
-								className={`${bgColorRef[zIndex] ?? "bg-white dark:bg-neutral-900"} flex flex-col cursor-grab active:cursor-grabbing touch-none`}
-								onPointerDown={(e) => dragControls.start(e)}
-							>
-								{/* Drag handle pill */}
-								<div className="flex justify-center pt-3 pb-4 shrink-0 touch-none select-none">
-									<div
-										className={
-											"w-1/5 h-1 rounded-full " +
-											(bg2ColorRef[zIndex] ??
-												"bg-neutral-300 dark:bg-neutral-600")
-										}
-									/>
-								</div>
-								{/* Actual Header */}
-								<div
-									className={
-										"flex items-center gap-2 px-4 pb-3 border-b shrink-0 " +
-										(border2ColorRef[zIndex] ??
-											"dark:border-neutral-700 border-neutral-200")
-									}
+								{/* Sheet */}
+								<motion.div
+									key="sheet"
+									className="fixed bottom-0 left-0 right-0 flex flex-col bg-white dark:bg-neutral-900 shadow-2xl overflow-hidden"
+									style={{ zIndex: sheetZ }}
+									// Enter / exit
+									initial={{ y: "100%" }}
+									animate={{
+										y: 0,
+										height: isFullscreen
+											? "100dvh"
+											: "80vh",
+										scale: isTopSheet
+											? 1
+											: Math.max(
+													1 - levelsAbove * 0.06,
+													0.8,
+												),
+										borderRadius: isTopSheet
+											? isFullscreen
+												? "0px"
+												: "16px 16px 0 0"
+											: "16px",
+										filter: isTopSheet
+											? "brightness(1)"
+											: `brightness(${Math.max(1 - levelsAbove * 0.15, 0.4)})`,
+										transformOrigin: isTopSheet
+											? "bottom center"
+											: "top center",
+									}}
+									exit={{
+										y: "100%",
+										scale: [1, 0],
+										filter: ["blur(0px)", "blur(100px)"],
+										opacity: [1, 0],
+									}}
+									transition={{
+										y: {
+											type: "spring",
+											stiffness: 400,
+											damping: 40,
+											mass: 1,
+										},
+										height: {
+											type: "spring",
+											stiffness: 350,
+											damping: 35,
+										},
+										transformOrigin: {
+											duration: 0,
+										},
+										scale: {
+											type: "spring",
+											stiffness: 350,
+											damping: 30,
+											mass: 0.8,
+										},
+										filter: {
+											duration: 0.3,
+											ease: "easeOut",
+										},
+										borderRadius: {
+											duration: 0.25,
+											ease: "easeInOut",
+										},
+									}}
+									// Drag — only initiated from the handle below
+									drag="y"
+									dragListener={false}
+									dragControls={dragControls}
+									dragConstraints={{
+										top: 0,
+										bottom: 0,
+									}}
+									dragElastic={{
+										top: 0.15,
+										bottom: 0.4,
+									}}
+									dragMomentum={false}
+									onDragEnd={handleDragEnd}
 								>
-									<div className="flex items-center justify-center p-1 dark:text-neutral-200 text-neutral-800 shrink-0">
-										{getIcon(tag.type)}
-									</div>
-									<Display
-										disabled={viewOnly}
-										className="font-semibold text-sm text-neutral-800 dark:text-neutral-100 truncate flex-1"
-										defaultValue={tag.name}
-										validate={() => true}
-										onSuccess={(newName) => {
-											updateTag({
-												...tag,
-												name: newName,
-											});
-											return newName;
-										}}
-									/>
-									<span
-										className={`text-sm
-											${textColorRef[zIndex] ?? "text-neutral-400 dark:text-neutral-500"}
-											${bg2ColorRef[zIndex] ?? "bg-neutral-200 dark:bg-neutral-500"}
-											${border2ColorRef[zIndex] ?? "border-neutral-400 dark:border-neutral-600"} border
-											py-0.5 px-2 rounded-full shrink-0`}
-									>
-										{TYPE_LABELS[
-											tag.type as TreeTagContainerType
-										] ?? tag.type}
-									</span>
-									<PathTransversalButton
-										title={
-											isFullscreen
-												? "Exit fullscreen"
-												: "Close"
+									{/* Sheet header */}
+									<div
+										className={`${bgColorRef[zIndex] ?? "bg-white dark:bg-neutral-900"} flex flex-col cursor-grab active:cursor-grabbing touch-none`}
+										onPointerDown={(e) =>
+											dragControls.start(e)
 										}
-										onClick={() => {
-											isFullscreen
-												? setIsFullscreen(false)
-												: setShowChildren(false);
-										}}
-										onSelectPath={(_selectedTag, index) => {
-											const fullPath = [
-												...overlayPath,
-												tag,
-											];
-											// If the user selected the current tag (last in path), just close fullscreen or do nothing
-											if (index === fullPath.length - 1) {
-												if (isFullscreen)
-													setIsFullscreen(false);
-												return;
+									>
+										{/* Drag handle pill */}
+										<div className="flex justify-center pt-3 pb-4 shrink-0 touch-none select-none">
+											<div
+												className={
+													"w-1/5 h-1 rounded-full " +
+													(bg2ColorRef[zIndex] ??
+														"bg-neutral-300 dark:bg-neutral-600")
+												}
+											/>
+										</div>
+										{/* Actual Header */}
+										<div
+											className={
+												"flex items-center gap-2 px-4 pb-3 border-b shrink-0 " +
+												(border2ColorRef[zIndex] ??
+													"dark:border-neutral-700 border-neutral-200")
 											}
-											// Selected an ancestor — close all sheets deeper than the selected index
-											closeSignal.closeToDepth(index);
-										}}
-										path={[...overlayPath, tag]}
-									/>
-								</div>
-							</div>
+										>
+											<div className="flex items-center justify-center p-1 dark:text-neutral-200 text-neutral-800 shrink-0">
+												{getIcon(tag.type)}
+											</div>
+											<Display
+												disabled={viewOnly}
+												className="font-semibold text-sm text-neutral-800 dark:text-neutral-100 truncate flex-1"
+												defaultValue={tag.name}
+												validate={() => true}
+												onSuccess={(newName) => {
+													updateTag({
+														...tag,
+														name: newName,
+													});
+													return newName;
+												}}
+											/>
+											<span
+												className={`text-sm
+													${textColorRef[zIndex] ?? "text-neutral-400 dark:text-neutral-500"}
+													${bg2ColorRef[zIndex] ?? "bg-neutral-200 dark:bg-neutral-500"}
+													${border2ColorRef[zIndex] ?? "border-neutral-400 dark:border-neutral-600"} border
+													py-0.5 px-2 rounded-full shrink-0`}
+											>
+												{TYPE_LABELS[
+													tag.type as TreeTagContainerType
+												] ?? tag.type}
+											</span>
+											<PathTransversalButton
+												title={
+													isFullscreen
+														? "Exit fullscreen"
+														: "Close"
+												}
+												onClick={() => {
+													isFullscreen
+														? setIsFullscreen(false)
+														: setShowChildren(
+																false,
+															);
+												}}
+												onSelectPath={(
+													_selectedTag,
+													index,
+												) => {
+													const fullPath = [
+														...overlayPath,
+														tag,
+													];
+													// If the user selected the current tag (last in path), just close fullscreen or do nothing
+													if (
+														index ===
+														fullPath.length - 1
+													) {
+														if (isFullscreen)
+															setIsFullscreen(
+																false,
+															);
+														return;
+													}
+													// Selected an ancestor — close all sheets deeper than the selected index
+													overlaySignal.closeToDepth(
+														index,
+													);
+												}}
+												path={[...overlayPath, tag]}
+											/>
+										</div>
+									</div>
 
-							{/* Scrollable content.
-							    Provide depth + 1 so any nested foldable body that the
-							    user opens will stack its own sheet above this one. */}
-							<OverlayDepthContext value={[...overlayPath, tag]}>
-								<div className="overflow-y-auto flex-1 px-3 py-2">
-									{children}
-									{addForm}
-								</div>
-							</OverlayDepthContext>
-						</motion.div>
-					</>
+									{/* Scrollable content.
+									    Provide depth + 1 so any nested foldable body that the
+									    user opens will stack its own sheet above this one. */}
+									<OverlayDepthContext
+										value={[...overlayPath, tag]}
+									>
+										<div className="overflow-y-auto flex-1 px-3 py-2">
+											{children}
+											{addForm}
+										</div>
+									</OverlayDepthContext>
+								</motion.div>
+							</>
+						)}
+					</AnimatePresence>,
+					portalContainer,
 				)}
-			</AnimatePresence>
 		</div>
 	);
 }
