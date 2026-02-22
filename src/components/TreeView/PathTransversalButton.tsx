@@ -83,7 +83,7 @@ export default function PathTransversalButton({
 						console.log(tag.type);
 						return (
 							<button
-								key={index}
+								key={tag.name + index.toString()}
 								onClick={() => {
 									onSelectPath(tag, index);
 									setShowSelectPath(false);
@@ -94,6 +94,7 @@ export default function PathTransversalButton({
 								{getIcon(tag.type, "", 18)}
 								<Display
 									disabled
+									enableToolbar={false}
 									defaultValue={tag.name}
 									placeholderText="(unnamed)"
 									className="placeholder:text-neutral-400 placeholder:italic"

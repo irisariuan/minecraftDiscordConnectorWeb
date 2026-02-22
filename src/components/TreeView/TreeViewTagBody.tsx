@@ -8,6 +8,9 @@ import {
 import { diffBgClass, type DiffStatus } from "../../lib/treeView/diff";
 import { getIcon } from "../../lib/treeView/component";
 import Display from "./Display";
+import { isAddableType, TYPE_LABELS } from "./AddChildForm";
+import { motion } from "framer-motion";
+import ToolBarLabel from "./ToolBarLabel";
 
 export default function TreeViewTagBody({
 	children,
@@ -44,6 +47,13 @@ export default function TreeViewTagBody({
 						defaultValue={tag.name}
 						className="text-neutral-800 dark:text-neutral-100"
 						disabled={viewOnly}
+						toolbarElement={
+							<ToolBarLabel>
+								{isAddableType(tag.type)
+									? TYPE_LABELS[tag.type]
+									: tag.type}
+							</ToolBarLabel>
+						}
 					/>
 				)}
 				{children}

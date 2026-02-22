@@ -8,6 +8,7 @@ import LoadingState from "./states/LoadingState";
 import NavBar from "./TreeView/NavBar";
 import TreeViewBody from "./TreeView/TreeViewBody";
 import { computeDiffMaps, type DiffMaps } from "../lib/treeView/diff";
+import { CompressionMethod } from "./TreeView/CompressSelect";
 
 export enum TreeEditorMode {
 	FileLoading,
@@ -29,6 +30,8 @@ export default function TreeViewEditor({
 	isDiff: boolean;
 	filename?: string;
 }) {
+	const [compressionMethod, setCompressionMethod] =
+		useState<CompressionMethod>(CompressionMethod.Gzip);
 	const [mode, setMode] = useState(TreeEditorMode.FileLoading);
 	const [tag, setTag] = useState<TreeTag<TreeTagType> | null>(null);
 	const [originalTag, setOriginalTag] = useState<TreeTag<TreeTagType> | null>(
@@ -37,7 +40,7 @@ export default function TreeViewEditor({
 	const [diffMaps, setDiffMaps] = useState<DiffMaps | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [hiding, setHiding] = useState<null | "original" | "edited">(null);
-	
+
 	// Hidden file-input ref for the import feature
 	const uploadInputRef = useRef<HTMLInputElement>(null);
 
@@ -71,6 +74,10 @@ export default function TreeViewEditor({
 		const ok = await submitEdit(id, stringify(tag), {
 			isNbt: true,
 			isBedrock,
+			compressionMethod:
+				compressionMethod === CompressionMethod.Uncompressed
+					? undefined
+					: compressionMethod,
 		});
 		setMode(ok ? TreeEditorMode.Submitted : TreeEditorMode.SubmitFailed);
 	}
@@ -259,6 +266,7 @@ export default function TreeViewEditor({
 							onSubmit={handleSubmit}
 							onDownload={handleDownload}
 							onUpload={triggerUpload}
+							onCompress={(c) => setCompressionMethod(c)}
 						/>
 					</div>
 				</>

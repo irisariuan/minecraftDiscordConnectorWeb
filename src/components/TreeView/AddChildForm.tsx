@@ -8,9 +8,9 @@ import {
 } from "../../lib/treeView/types";
 import { getIcon } from "../../lib/treeView/component";
 
-type AddableType = Exclude<TreeTagType, TreeTagValueType.CompoundEnd>;
+export type AddableType = Exclude<TreeTagType, TreeTagValueType.CompoundEnd>;
 
-const ADDABLE_TYPES: AddableType[] = [
+export const ADDABLE_TYPES: AddableType[] = [
 	TreeTagValueType.Byte,
 	TreeTagValueType.ShortInt,
 	TreeTagValueType.Int,
@@ -24,6 +24,9 @@ const ADDABLE_TYPES: AddableType[] = [
 	TreeTagContainerType.List,
 	TreeTagContainerType.Compound,
 ];
+export function isAddableType(type: TreeTagType): type is AddableType {
+	return ADDABLE_TYPES.includes(type as AddableType);
+}
 
 export const TYPE_LABELS: Record<AddableType, string> = {
 	[TreeTagValueType.Byte]: "Byte",

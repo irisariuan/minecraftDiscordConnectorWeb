@@ -5,6 +5,7 @@ import {
 	IoDownloadOutline,
 	IoCloudUploadOutline,
 } from "react-icons/io5";
+import CompressSelect, { type CompressionMethod } from "./CompressSelect";
 
 export default function NavBar({
 	mode,
@@ -12,15 +13,14 @@ export default function NavBar({
 	onDeny,
 	onDownload,
 	onUpload,
-	isFallback,
+	onCompress,
 }: {
 	mode: TreeEditorMode;
 	onSubmit: () => void;
 	onDeny?: () => void;
 	onDownload?: () => void;
 	onUpload?: () => void;
-	/** True when the NBT parser failed and we are showing a raw-text fallback */
-	isFallback?: boolean;
+	onCompress?: (compressionMethod: CompressionMethod) => void;
 }) {
 	const isSubmitting = mode === TreeEditorMode.Submitting;
 	const isSubmitted = mode === TreeEditorMode.Submitted;
@@ -90,13 +90,7 @@ export default function NavBar({
 					<span>Download</span>
 				</button>
 			)}
-
-			{/* Fallback warning badge */}
-			{isFallback && (
-				<span className="text-xs font-semibold px-2 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700">
-					⚠ NBT parse failed — raw fallback
-				</span>
-			)}
+			{onCompress && <CompressSelect onCompress={onCompress} />}
 
 			<div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 ml-auto">
 				<span className="text-xs">

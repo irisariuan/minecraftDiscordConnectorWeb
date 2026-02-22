@@ -58,6 +58,14 @@ export const bgColorRef: Record<number, string> = {
 	4: "bg-yellow-100 dark:bg-yellow-950",
 	5: "bg-purple-100 dark:bg-purple-950",
 };
+export const bg2ColorRef: Record<number, string> = {
+	0: "bg-neutral-300 dark:bg-neutral-700",
+	1: "bg-red-200 dark:bg-red-900",
+	2: "bg-blue-200 dark:bg-blue-900",
+	3: "bg-green-200 dark:bg-green-900",
+	4: "bg-yellow-200 dark:bg-yellow-900",
+	5: "bg-purple-200 dark:bg-purple-900",
+};
 
 export const textColorRef: Record<number, string> = {
 	0: "text-neutral-600 dark:text-neutral-500",
@@ -74,4 +82,11 @@ export const borderColorRef: Record<number, string> = {
 	3: "border-green-400 dark:border-green-500",
 	4: "border-yellow-400 dark:border-yellow-500",
 	5: "border-purple-400 dark:border-purple-500",
+};
+export const border2ColorRef: Record<number, string> = {
+	1: "border-red-300 dark:border-red-900",
+	2: "border-blue-300 dark:border-blue-900",
+	3: "border-green-300 dark:border-green-900",
+	4: "border-yellow-300 dark:border-yellow-900",
+	5: "border-purple-300 dark:border-purple-900",
 };

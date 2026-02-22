@@ -7,7 +7,9 @@ import {
 	type PanInfo,
 } from "motion/react";
 import {
+	bg2ColorRef,
 	bgColorRef,
+	border2ColorRef,
 	borderColorRef,
 	getIcon,
 	textColorRef,
@@ -25,8 +27,9 @@ import {
 	useOverlayCloseSignal,
 } from "./OverlayContext";
 import Display from "./Display";
-import AddChildForm, { TYPE_LABELS } from "./AddChildForm";
+import AddChildForm, { isAddableType, TYPE_LABELS } from "./AddChildForm";
 import PathTransversalButton from "./PathTransversalButton";
+import ToolBarLabel from "./ToolBarLabel";
 
 export default function TreeViewTagFoldableBody({
 	children,
@@ -94,7 +97,7 @@ export default function TreeViewTagFoldableBody({
 
 		if (isFullscreen) {
 			// Fast or far down → close entirely; moderate down → exit fullscreen
-			if (vy > 800 || oy > 220) {
+			if (vy > 1200 || oy > 280) {
 				setIsFullscreen(false);
 				setShowChildren(false);
 			} else if (vy > 200 || oy > 80) {
@@ -128,8 +131,15 @@ export default function TreeViewTagFoldableBody({
 						defaultValue={tag.name}
 						disabled={viewOnly}
 						onDoubleClick={() => {
-							setShowChildren(true);
+							if (viewOnly) setShowChildren(true);
 						}}
+						toolbarElement={
+							<ToolBarLabel>
+								{isAddableType(tag.type)
+									? TYPE_LABELS[tag.type]
+									: tag.type}
+							</ToolBarLabel>
+						}
 					/>
 				)}
 
@@ -265,22 +275,44 @@ export default function TreeViewTagFoldableBody({
 							>
 								{/* Drag handle pill */}
 								<div className="flex justify-center pt-3 pb-4 shrink-0 touch-none select-none">
-									<div className="w-1/5 h-1 rounded-full bg-neutral-300 dark:bg-neutral-600" />
+									<div
+										className={
+											"w-1/5 h-1 rounded-full " +
+											(bg2ColorRef[zIndex] ??
+												"bg-neutral-300 dark:bg-neutral-600")
+										}
+									/>
 								</div>
 								{/* Actual Header */}
-								<div className="flex items-center gap-2 px-4 pb-3 border-b dark:border-neutral-700 border-neutral-200 shrink-0">
+								<div
+									className={
+										"flex items-center gap-2 px-4 pb-3 border-b shrink-0 " +
+										(border2ColorRef[zIndex] ??
+											"dark:border-neutral-700 border-neutral-200")
+									}
+								>
 									<div className="flex items-center justify-center p-1 dark:text-neutral-200 text-neutral-800 shrink-0">
 										{getIcon(tag.type)}
 									</div>
-									<span className="font-semibold text-sm text-neutral-800 dark:text-neutral-100 truncate flex-1">
-										{tag.name || (
-											<span className="italic text-neutral-400">
-												(unnamed)
-											</span>
-										)}
-									</span>
+									<Display
+										disabled={viewOnly}
+										className="font-semibold text-sm text-neutral-800 dark:text-neutral-100 truncate flex-1"
+										defaultValue={tag.name}
+										validate={() => true}
+										onSuccess={(newName) => {
+											updateTag({
+												...tag,
+												name: newName,
+											});
+											return newName;
+										}}
+									/>
 									<span
-										className={`text-sm ${textColorRef[zIndex] ?? "text-neutral-400 dark:text-neutral-500"} shrink-0`}
+										className={`text-sm
+											${textColorRef[zIndex] ?? "text-neutral-400 dark:text-neutral-500"}
+											${bg2ColorRef[zIndex] ?? "bg-neutral-200 dark:bg-neutral-500"}
+											${border2ColorRef[zIndex] ?? "border-neutral-400 dark:border-neutral-600"} border
+											py-0.5 px-2 rounded-full shrink-0`}
 									>
 										{TYPE_LABELS[
 											tag.type as TreeTagContainerType

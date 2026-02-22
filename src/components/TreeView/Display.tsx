@@ -1,62 +1,8 @@
+import { AnimatePresence } from "motion/react";
 import { useRef, useState, useCallback, useEffect } from "react";
-
-/**
- * Walk up the DOM tree and find the nearest ancestor that establishes a
- * containing block for `position: fixed` elements. This happens when an
- * ancestor has a CSS `transform`, `filter`, `backdrop-filter`, `perspective`,
- * `will-change` that mentions transform/filter, or `contain: paint`.
- *
- * Motion (framer-motion / motion) typically leaves `transform: scaleY(1)` on
- * animated elements after their entrance animation completes. Even though it
- * is the identity transform, it still creates a new containing block, which
- * shifts the coordinate origin for any `position: fixed` descendant away from
- * the viewport to the transformed ancestor's top-left corner.
- *
- * When a transformed ancestor is found, returns its viewport-space offset
- * (via `getBoundingClientRect()`).
- *
- * When **no** such ancestor exists, `position: fixed` is relative to the
- * Initial Containing Block (layout viewport). On iOS Safari the virtual
- * keyboard can scroll the visual viewport within the layout viewport, causing
- * `getBoundingClientRect()` (visual-viewport coords) and `position: fixed`
- * (layout-viewport coords) to diverge. We compensate by returning the
- * negated `visualViewport` offset so the caller's subtraction
- * (`rect - offset`) converts visual-viewport coords → layout-viewport coords.
- */
-function getFixedAncestorOffset(element: HTMLElement): {
-	x: number;
-	y: number;
-} {
-	let el = element.parentElement;
-	while (el && el !== document.documentElement) {
-		const cs = window.getComputedStyle(el);
-		const isContainingBlock =
-			(cs.transform && cs.transform !== "none") ||
-			(cs.filter && cs.filter !== "none") ||
-			(cs.backdropFilter && cs.backdropFilter !== "none") ||
-			(cs.perspective && cs.perspective !== "none") ||
-			(cs.willChange &&
-				/transform|filter|perspective/.test(cs.willChange)) ||
-			(cs.contain && /paint|layout|strict|content/.test(cs.contain));
-
-		if (isContainingBlock) {
-			const rect = el.getBoundingClientRect();
-			return { x: rect.left, y: rect.top };
-		}
-		el = el.parentElement;
-	}
-	// No transformed ancestor → position:fixed is relative to the layout
-	// viewport (ICB).  getBoundingClientRect() returns visual-viewport
-	// coords.  On iOS Safari these diverge when the virtual keyboard is
-	// open because the visual viewport scrolls within the layout viewport.
-	// Return the negated offset so the caller's  `rect.top - offset.y`
-	// produces layout-viewport coordinates.
-	const vv = window.visualViewport;
-	return {
-		x: -(vv?.offsetLeft ?? 0),
-		y: -(vv?.offsetTop ?? 0),
-	};
-}
+import { IoCopy, IoCut, IoTrash } from "react-icons/io5";
+import ToolBarButton from "./ToolBarButton";
+import { isAddableType, TYPE_LABELS } from "./AddChildForm";
 
 export default function Display({
 	defaultValue,
@@ -67,6 +13,8 @@ export default function Display({
 	disabled,
 	placeholderText = "Nil",
 	onDoubleClick,
+	toolbarElement,
+	enableToolbar = true,
 }: {
 	defaultValue?: string;
 	validate?: (input: string) => boolean;
@@ -75,22 +23,22 @@ export default function Display({
 	overrideClassName?: boolean;
 	disabled?: boolean;
 	placeholderText?: string;
+		enableToolbar?: boolean;
+	toolbarElement?: React.ReactNode;
 	/*
 	 * Activate on mobile, disabled only
 	 */
 	onDoubleClick?: () => void;
 }) {
-	const ref = useRef<HTMLInputElement | null>(null);
+	const ref = useRef<HTMLInputElement | HTMLSpanElement | null>(null);
 	const wrapperRef = useRef<HTMLDivElement | null>(null);
 	const [text, setText] = useState(defaultValue);
 	const [isExpanded, setIsExpanded] = useState(false);
+	const [showToolbar, setShowToolbar] = useState(false);
 	const [expandedWidth, setExpandedWidth] = useState<number | undefined>();
 	// Viewport-space rect of the wrapper, captured at expand time and kept
 	// up-to-date on scroll / resize so the fixed overlay tracks the row.
 	const [fixedRect, setFixedRect] = useState<DOMRect | undefined>();
-	// Offset of the nearest transformed ancestor so we can compensate for
-	// the shifted coordinate origin of position:fixed.
-	const [ancestorOffset, setAncestorOffset] = useState({ x: 0, y: 0 });
 
 	const isFocused = useRef(false);
 	const isHovered = useRef(false);
@@ -130,15 +78,21 @@ export default function Display({
 	const capturePosition = useCallback(() => {
 		if (!wrapperRef.current) return;
 		setFixedRect(wrapperRef.current.getBoundingClientRect());
-		setAncestorOffset(getFixedAncestorOffset(wrapperRef.current));
 	}, []);
 
 	// ── Expand / collapse ─────────────────────────────────────────────────
 
+	/** Get the text content from either an input or a span. */
+	const getRefText = useCallback((): string => {
+		if (!ref.current) return "";
+		if (ref.current instanceof HTMLInputElement) return ref.current.value;
+		return ref.current.textContent ?? "";
+	}, []);
+
 	const tryExpand = useCallback(
 		(forceFocus = false) => {
 			if (!ref.current || !wrapperRef.current) return;
-			const value = ref.current.value || placeholderText;
+			const value = getRefText() || placeholderText;
 			const naturalWidth = measureNaturalWidth(value);
 			const rect = wrapperRef.current.getBoundingClientRect();
 
@@ -149,7 +103,6 @@ export default function Display({
 			if (!wouldOverflow && !forceFocus) return;
 
 			setFixedRect(rect);
-			setAncestorOffset(getFixedAncestorOffset(wrapperRef.current));
 			setExpandedWidth(
 				wouldOverflow && naturalWidth !== undefined
 					? naturalWidth + 6
@@ -157,7 +110,7 @@ export default function Display({
 			);
 			setIsExpanded(true);
 		},
-		[measureNaturalWidth, placeholderText],
+		[measureNaturalWidth, placeholderText, getRefText],
 	);
 
 	const collapse = useCallback(() => {
@@ -171,7 +124,7 @@ export default function Display({
 	/** Re-measure while the user is typing so the overlay width tracks. */
 	const handleInput = useCallback(() => {
 		if (!isExpanded || !ref.current || !wrapperRef.current) return;
-		const value = ref.current.value || placeholderText;
+		const value = getRefText() || placeholderText;
 		const naturalWidth = measureNaturalWidth(value);
 		const containerWidth = wrapperRef.current.clientWidth;
 		if (naturalWidth !== undefined && naturalWidth > containerWidth) {
@@ -179,7 +132,7 @@ export default function Display({
 		} else {
 			setExpandedWidth(undefined);
 		}
-	}, [isExpanded, measureNaturalWidth, placeholderText]);
+	}, [isExpanded, measureNaturalWidth, placeholderText, getRefText]);
 
 	// ── Keep position in sync while expanded ──────────────────────────────
 
@@ -227,12 +180,6 @@ export default function Display({
 
 	const expandedInputStyle: React.CSSProperties = fixedRect
 		? {
-				position: "fixed",
-				// Subtract the ancestor offset so the overlay lands in the
-				// correct viewport position even when position:fixed is
-				// relative to a transformed ancestor rather than the viewport.
-				top: fixedRect.top - ancestorOffset.y,
-				left: fixedRect.left - ancestorOffset.x,
 				height: fixedRect.height,
 				minWidth: fixedRect.width,
 				maxWidth,
@@ -245,6 +192,7 @@ export default function Display({
 		: {};
 
 	const expandedInputClass =
+		"absolute top-0 " +
 		"bg-white dark:bg-neutral-950 " +
 		"shadow dark:shadow-neutral-800 shadow-neutral-500 " +
 		"rounded-sm px-1";
@@ -258,7 +206,6 @@ export default function Display({
 		};
 	}, []);
 	function doubleClickHandler() {
-		if (!disabled) return
 		if (clickTimeout.current) {
 			clearTimeout(clickTimeout.current);
 			clickTimeout.current = null;
@@ -275,7 +222,7 @@ export default function Display({
 	return (
 		<div
 			ref={wrapperRef}
-			className={`relative w-full ${className ?? ""}`}
+			className={`relative w-full group ${className ?? ""}`}
 			// Reserve the row height when the input goes position:fixed.
 			style={
 				isExpanded && fixedRect
@@ -285,62 +232,166 @@ export default function Display({
 			// ── hover (on wrapper so it works even when input is disabled) ─
 			onMouseEnter={() => {
 				isHovered.current = true;
+				setShowToolbar(true);
 				tryExpand(false);
 			}}
 			onMouseLeave={() => {
 				isHovered.current = false;
+				setShowToolbar(false);
 				collapse();
 			}}
 			onTouchStart={() => {
 				tryExpand(false);
 			}}
-			onTouchEnd={doubleClickHandler}
+			onClick={() => {
+				setShowToolbar(true);
+				doubleClickHandler();
+			}}
 		>
-			<input
-				ref={ref}
-				defaultValue={defaultValue}
-				type="text"
-				className={
-					overrideClassName
-						? className
-						: `outline-0 placeholder:text-red-500 dark:placeholder:text-red-400 placeholder:italic ` +
-							(isExpanded
-								? expandedInputClass
-								: collapsedInputClass)
-				}
-				style={isExpanded ? expandedInputStyle : undefined}
-				placeholder={placeholderText}
-				disabled={disabled}
-				// ── focus / edit ───────────────────────────────────────
-				onFocus={() => {
-					isFocused.current = true;
-					tryExpand(true);
-					// On iOS Safari the virtual keyboard opens after
-					// focus, scrolling the page.  Re-capture position once
-					// the keyboard animation has likely settled so the
-					// fixed overlay tracks the wrapper's new location.
-					requestAnimationFrame(() => {
-						capturePosition();
-						// A second pass catches slower keyboard animations.
-						setTimeout(() => capturePosition(), 300);
-					});
-				}}
-				onInput={handleInput}
-				onBlur={(inp) => {
-					isFocused.current = false;
-					setIsExpanded(false);
-					setExpandedWidth(undefined);
-					setFixedRect(undefined);
-					if (inp.currentTarget.value === text) return;
-					if (!validate?.(inp.currentTarget.value)) {
-						inp.preventDefault();
-						if (!text) return;
-						inp.currentTarget.value = text;
-						return;
+			{disabled ? (
+				<span
+					ref={ref as React.Ref<HTMLSpanElement>}
+					className={
+						overrideClassName
+							? className
+							: `outline-0 block ` +
+								(isExpanded
+									? expandedInputClass + ' overflow-x-scroll text-nowrap'
+									: collapsedInputClass) +
+								(!defaultValue
+									? " text-red-500 dark:text-red-400 italic"
+									: "")
 					}
-					setText(onSuccess?.(inp.currentTarget.value));
-				}}
-			/>
+					style={isExpanded ? expandedInputStyle : undefined}
+				>
+					{defaultValue || placeholderText}
+				</span>
+			) : (
+				<input
+					ref={ref as React.Ref<HTMLInputElement>}
+					defaultValue={defaultValue}
+					type="text"
+					className={
+						overrideClassName
+							? className
+							: `outline-0 placeholder:text-red-500 dark:placeholder:text-red-400 placeholder:italic ` +
+								(isExpanded
+									? expandedInputClass
+									: collapsedInputClass)
+					}
+					style={isExpanded ? expandedInputStyle : undefined}
+					placeholder={placeholderText}
+					// ── focus / edit ───────────────────────────────────────
+					onFocus={() => {
+						isFocused.current = true;
+						tryExpand(true);
+						setShowToolbar(true);
+						// On iOS Safari the virtual keyboard opens after
+						// focus, scrolling the page.  Re-capture position once
+						// the keyboard animation has likely settled so the
+						// fixed overlay tracks the wrapper's new location.
+						requestAnimationFrame(() => {
+							capturePosition();
+							// A second pass catches slower keyboard animations.
+							setTimeout(() => capturePosition(), 300);
+						});
+					}}
+					onInput={handleInput}
+					onBlur={(inp) => {
+						isFocused.current = false;
+						setIsExpanded(false);
+						setExpandedWidth(undefined);
+						setFixedRect(undefined);
+						if (inp.currentTarget.value === text) return;
+						if (!validate?.(inp.currentTarget.value)) {
+							inp.preventDefault();
+							if (!text) return;
+							inp.currentTarget.value = text;
+							return;
+						}
+						setText(onSuccess?.(inp.currentTarget.value));
+					}}
+				/>
+			)}
+			{enableToolbar && (
+				<AnimatePresence>
+					{(showToolbar || isExpanded) && (
+						<div className="absolute box-border py-2 mt-4 rounded z-10 flex flex-wrap justify-center gap-2 items-center top-0">
+							{toolbarElement}
+							<ToolBarButton
+								className="hover:text-blue-500 active:text-blue-800"
+								onClick={() => {
+									try {
+										navigator.clipboard
+											.writeText(getRefText())
+											.catch(() => {});
+									} catch (e) {
+										console.error(
+											"Clipboard API not supported",
+											e,
+										);
+									}
+								}}
+							>
+								<IoCopy />
+							</ToolBarButton>
+							{!disabled && (
+								<>
+									<ToolBarButton
+										className="hover:text-green-500 active:text-green-800"
+										onClick={() => {
+											if (
+												!ref.current ||
+												!(
+													ref.current instanceof
+													HTMLInputElement
+												)
+											)
+												return;
+											try {
+												navigator.clipboard
+													.writeText(getRefText())
+													.catch(() => {});
+											} catch (e) {
+												console.error(
+													"Clipboard API not supported",
+													e,
+												);
+											}
+											ref.current.value = "";
+											setText("");
+											ref.current.focus();
+											handleInput();
+										}}
+									>
+										<IoCut />
+									</ToolBarButton>
+
+									<ToolBarButton
+										className="hover:text-red-500 active:text-red-800"
+										onClick={() => {
+											if (
+												!ref.current ||
+												!(
+													ref.current instanceof
+													HTMLInputElement
+												)
+											)
+												return;
+											ref.current.value = "";
+											setText("");
+											ref.current.focus();
+											handleInput();
+										}}
+									>
+										<IoTrash />
+									</ToolBarButton>
+								</>
+							)}
+						</div>
+					)}
+				</AnimatePresence>
+			)}
 		</div>
 	);
 }
