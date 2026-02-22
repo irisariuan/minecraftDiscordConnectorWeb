@@ -2,7 +2,6 @@ import { AnimatePresence } from "motion/react";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { IoCopy, IoCut, IoTrash } from "react-icons/io5";
 import ToolBarButton from "./ToolBarButton";
-import { isAddableType, TYPE_LABELS } from "./AddChildForm";
 
 export default function Display({
 	defaultValue,

@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { IoCaretDown, IoCaretUp, IoTrash, IoClose } from "react-icons/io5";
+import { IoCaretDown, IoCaretUp, IoTrash } from "react-icons/io5";
+import { LuFileJson2 } from "react-icons/lu";
 import {
 	AnimatePresence,
 	motion,
@@ -30,6 +31,8 @@ import Display from "./Display";
 import AddChildForm, { isAddableType, TYPE_LABELS } from "./AddChildForm";
 import PathTransversalButton from "./PathTransversalButton";
 import ToolBarLabel from "./ToolBarLabel";
+import ToolBarButton from "./ToolBarButton";
+import { stringify } from "../../lib/jsonBigInt";
 
 export default function TreeViewTagFoldableBody({
 	children,
@@ -134,11 +137,27 @@ export default function TreeViewTagFoldableBody({
 							if (viewOnly) setShowChildren(true);
 						}}
 						toolbarElement={
-							<ToolBarLabel>
-								{isAddableType(tag.type)
-									? TYPE_LABELS[tag.type]
-									: tag.type}
-							</ToolBarLabel>
+							<>
+								<ToolBarLabel>
+									{isAddableType(tag.type)
+										? TYPE_LABELS[tag.type]
+										: tag.type}
+								</ToolBarLabel>
+								<ToolBarButton
+									onClick={() => {
+										const jsonString = stringify(
+											tag,
+											null,
+											2,
+										);
+										navigator.clipboard.writeText(
+											jsonString,
+										);
+									}}
+								>
+									<LuFileJson2 />
+								</ToolBarButton>
+							</>
 						}
 					/>
 				)}
