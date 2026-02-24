@@ -76,11 +76,7 @@ export default function ViewTreeEditor({
 	return (
 		<div className="flex flex-col h-full w-full overflow-hidden">
 			<div className="flex-1 overflow-auto">
-				<TreeViewBody
-					data={tag}
-					setData={() => {}}
-					viewOnly
-				/>
+				<TreeViewBody data={tag} setData={() => {}} viewOnly />
 			</div>
 			<div className="p-2 flex gap-2 border-t dark:border-gray-700 border-gray-300 w-full items-center flex-wrap">
 				{/* Copy */}

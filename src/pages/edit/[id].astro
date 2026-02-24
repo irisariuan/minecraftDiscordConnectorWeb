@@ -9,6 +9,7 @@ import {
 } from "../../lib/server/request";
 const { id } = Astro.params;
 if (!id) return Astro.redirect("/edit/error");
+const forceNbt = Astro.url.searchParams.get("forceNbt") === "true";
 const result = await serverSideVerifyId(id);
 if (!result.valid || result.edited) return Astro.redirect("/edit/error");
 
@@ -54,10 +55,9 @@ const title = "Editing " + metadata.filename;
 		</div>
 		<div class="flex-1 flex flex-col">
 			{
-				metadata.isNBT ? (
+				metadata.isNBT || forceNbt ? (
 					<TreeViewEditor
 						id={id}
-						isBedrock={false}
 						isDiff={metadata.isDiff}
 						filename={metadata.filename}
 						client:load

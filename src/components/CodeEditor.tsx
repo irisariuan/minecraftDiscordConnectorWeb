@@ -213,7 +213,7 @@ export default function CodeEditor({
 					<button
 						onClick={triggerUpload}
 						title="Replace editor content with a local file"
-						className="py-2 px-4 h-full rounded-2xl cursor-pointer transition-colors flex items-center gap-1 text-sm bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-neutral-200"
+						className="py-2 px-4 rounded-2xl cursor-pointer transition-colors flex items-center gap-1 text-sm bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-neutral-200"
 					>
 						<IoCloudUploadOutline className="h-5 w-5" />
 						<span>Import</span>
@@ -225,7 +225,7 @@ export default function CodeEditor({
 					<button
 						onClick={handleDownload}
 						title="Download current file content"
-						className="py-2 px-4 h-full rounded-2xl cursor-pointer transition-colors flex items-center gap-1 text-sm bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-neutral-200"
+						className="py-2 px-4 rounded-2xl cursor-pointer transition-colors flex items-center gap-1 text-sm bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-neutral-200"
 					>
 						<IoDownloadOutline className="h-5 w-5" />
 						<span>Download</span>

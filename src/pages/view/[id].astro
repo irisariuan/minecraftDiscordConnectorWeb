@@ -8,6 +8,7 @@ import { serverSideGetViewFileMetadata } from "../../lib/server/request";
 const { id } = Astro.params;
 if (!id) return Astro.redirect("/error");
 
+const forceNbt = Astro.url.searchParams.get("forceNbt") === "true";
 const metadata = await serverSideGetViewFileMetadata(id);
 if (!metadata) return Astro.redirect("/error");
 
@@ -35,10 +36,17 @@ const title = "Viewing " + fileName;
 					</span>
 				)
 			}
+			{
+				forceNbt && !isNbt && (
+					<span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300">
+						Forced NBT
+					</span>
+				)
+			}
 		</div>
 		<div class="flex-1 flex flex-col overflow-hidden">
 			{
-				isNbt ? (
+				isNbt || forceNbt ? (
 					<ViewTreeEditor id={id} filename={fileName} client:load />
 				) : (
 					<ViewCodeEditor
