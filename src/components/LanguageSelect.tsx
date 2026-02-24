@@ -14,7 +14,7 @@ export default function LanguageSelect({
 				setLanguage(event.currentTarget.selectedOptions[0].value);
 			}}
 			value={language}
-			className="bg-neutral-700 text-white p-2 rounded-2xl"
+			className="bg-neutral-700 text-white p-2 text-sm rounded-2xl"
 		>
 			<option value="javascript">JavaScript</option>
 			<option value="typescript">TypeScript</option>

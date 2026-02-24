@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
 import { stringify } from "../lib/jsonBigInt";
-import {
-	IoCheckmarkSharp,
-	IoDownloadOutline,
-	IoEyeSharp,
-} from "react-icons/io5";
+import { IoCheckmarkSharp, IoDownloadOutline } from "react-icons/io5";
 import type { TreeTag, TreeTagType } from "../lib/treeView/types";
 import { fetchViewNbtFile } from "../lib/request";
 import LoadingState from "./states/LoadingState";
 import ErrorState from "./states/ErrorState";
 import TreeViewBody from "./TreeView/TreeViewBody";
+import ReadOnlySign from "./ReadOnlySign";
 
 export default function ViewTreeEditor({
 	id,
@@ -111,8 +108,7 @@ export default function ViewTreeEditor({
 				</button>
 
 				<div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 ml-auto">
-					<IoEyeSharp className="h-4 w-4" />
-					<span className="font-semibold">Read-only</span>
+					<ReadOnlySign />
 					<span className="text-xs">
 						This link will expire automatically
 					</span>

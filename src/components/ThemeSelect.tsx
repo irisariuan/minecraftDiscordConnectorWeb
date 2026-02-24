@@ -26,7 +26,7 @@ export default function ThemeSelect({
 			}
 			}
 			value={theme}
-			className="bg-neutral-700 text-white p-2 rounded-2xl"
+			className="bg-neutral-700 text-white p-2 text-sm rounded-2xl"
 		>
 			<option value="dracula">Dracula</option>
 			<option value="github-dark">GitHub Dark</option>

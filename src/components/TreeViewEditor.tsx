@@ -53,8 +53,10 @@ export default function TreeViewEditor({
 		if (isBedrock === null) return; // Wait for platform selection
 		(async () => {
 			setMode(TreeEditorMode.FileLoading);
-			const result = await fetchEditingNbtFile(id, isBedrock);
-			if (!result) {
+			const result = await fetchEditingNbtFile(id, isBedrock).catch(
+				() => null,
+			);
+			if (!result || !result.tag) {
 				setError("Failed to load file");
 				setMode(TreeEditorMode.SubmitFailed);
 				return;

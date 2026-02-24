@@ -17,10 +17,12 @@ import {
 import { disposeFile, fetchEditingFile, submitEdit } from "../lib/request";
 import type { EditFileMetadata } from "../lib/server/request";
 import {
-	IoEyeSharp,
 	IoDownloadOutline,
 	IoCloudUploadOutline,
+	IoCloudUpload,
+	IoClose,
 } from "react-icons/io5";
+import ReadOnlySign from "./ReadOnlySign";
 export default function CodeEditor({
 	id,
 	metadata,
@@ -189,13 +191,14 @@ export default function CodeEditor({
 			<div className="p-2 flex gap-2 border-t dark:border-gray-700 border-gray-300 w-full items-center flex-wrap">
 				{/* Submit */}
 				<button
-					className="bg-blue-500 py-2 px-4 rounded-2xl text-white cursor-pointer disabled:cursor-auto hover:bg-blue-600 active:bg-blue-800 disabled:bg-neutral-500 disabled:text-neutral-400 transition-colors"
+					className="bg-blue-500 py-2 px-4 flex items-center gap-1 text-sm rounded-2xl text-white cursor-pointer disabled:cursor-auto hover:bg-blue-600 active:bg-blue-800 disabled:bg-neutral-500 disabled:text-neutral-400 transition-colors"
 					disabled={
 						mode === EditorMode.FileLoading || !editable(mode)
 					}
 					onClick={uploadFileHandler}
 				>
-					{isViewOnly(mode) ? "Submitted" : "Submit"}
+					<IoCloudUpload className="h-5 w-5" />
+					<span>{isViewOnly(mode) ? "Submitted" : "Submit"}</span>
 				</button>
 
 				{/* Deny (diff mode) */}
@@ -204,6 +207,7 @@ export default function CodeEditor({
 						onClick={disposeDiff}
 						className="bg-red-500 py-2 px-4 rounded-2xl text-white cursor-pointer disabled:cursor-auto hover:bg-red-600 active:bg-red-800 disabled:bg-neutral-500 disabled:text-neutral-400 transition-colors"
 					>
+						<IoClose className="h-5 w-5" />
 						Deny
 					</button>
 				)}
@@ -236,12 +240,7 @@ export default function CodeEditor({
 				<LanguageSelect language={language} setLanguage={setLanguage} />
 
 				<div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mr-auto w-full flex-1 justify-end">
-					{isViewOnly(mode) && (
-						<>
-							<IoEyeSharp className="h-4 w-4" />
-							<span className="font-semibold">Read-only</span>
-						</>
-					)}
+					{isViewOnly(mode) && <ReadOnlySign />}
 					<span className="text-xs">
 						This link will expire automatically
 					</span>

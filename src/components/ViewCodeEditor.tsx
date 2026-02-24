@@ -1,10 +1,6 @@
 import { Editor } from "@monaco-editor/react";
 import { useEffect, useRef, useState } from "react";
-import {
-	IoCheckmarkSharp,
-	IoDownloadOutline,
-	IoEyeSharp,
-} from "react-icons/io5";
+import { IoCheckmarkSharp, IoDownloadOutline } from "react-icons/io5";
 
 import { decideLanguageFromExtension } from "../lib/language";
 import LanguageSelect from "./LanguageSelect";
@@ -12,6 +8,7 @@ import ThemeSelect from "./ThemeSelect";
 import LoadingState from "./states/LoadingState";
 import ErrorState from "./states/ErrorState";
 import { fetchViewFile } from "../lib/request";
+import ReadOnlySign from "./ReadOnlySign";
 
 export default function ViewCodeEditor({
 	id,
@@ -30,7 +27,6 @@ export default function ViewCodeEditor({
 		decideLanguageFromExtension(extension),
 	);
 	const [copied, setCopied] = useState(false);
-
 
 	useEffect(() => {
 		(async () => {
@@ -74,7 +70,7 @@ export default function ViewCodeEditor({
 		a.click();
 		URL.revokeObjectURL(url);
 	};
-	
+
 	if (loading) {
 		return <LoadingState />;
 	}
@@ -137,8 +133,7 @@ export default function ViewCodeEditor({
 				<LanguageSelect language={language} setLanguage={setLanguage} />
 
 				<div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mr-auto flex-1 w-full justify-end">
-					<IoEyeSharp className="h-4 w-4" />
-					<span className="font-semibold">Read-only</span>
+					<ReadOnlySign />
 					<span className="text-xs">
 						This link will expire automatically
 					</span>

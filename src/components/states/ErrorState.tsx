@@ -8,14 +8,16 @@ export default function ErrorState({ errorMessage }: ErrorStateProps) {
 	};
 
 	return (
-		<div className="bg-linear-to-b from-red-700 to-red-800 w-full flex-1 flex items-center justify-center gap-4 flex-col p-4">
-			<p className="text-white text-5xl">Error</p>
-			<p className="text-red-300 text-xl">{errorMessage}</p>
+		<div className="flex flex-col items-center justify-center h-full gap-4">
+			<h1 className="text-red-500 dark:text-red-400 text-3xl font-semibold">
+				Error
+			</h1>
+			<h2>{errorMessage}</h2>
 			<button
 				onClick={handleReload}
-				className="text-white border border-px border-white p-4 w-full rounded-4xl hover:cursor-pointer hover:bg-white hover:text-red-800 transition-colors"
+				className="bg-blue-500 hover:bg-blue-600 active:bg-blue-800 text-white py-2 px-4 rounded-2xl transition-colors cursor-pointer"
 			>
-				Reload
+				Reload Page
 			</button>
 		</div>
 	);
